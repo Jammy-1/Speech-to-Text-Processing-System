@@ -1,3 +1,4 @@
+# Key Vault
 resource "azurerm_key_vault" "main" {
   name                       = var.key_vault_name
   resource_group_name        = var.resource_group_name
@@ -9,8 +10,17 @@ resource "azurerm_key_vault" "main" {
   soft_delete_retention_days = 90
 }
 
+# RBAC - AKS
+resource "azurerm_role_assignment" "kv_account_aks" {
+  scope = azurerm_key_vault.main.id
+  role_definition_name = "Key Vault Secrets"
+  principal_id = module.aks.aks_principal_id
+}
+
+# Secret - Speech Key
 resource "azurerm_key_vault_secret" "speech_key" {
   name         = var.speech_key_name
   value        = var.speech_key
   key_vault_id = azurerm_key_vault.main.id
 }
+
