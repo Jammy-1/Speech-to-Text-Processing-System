@@ -1,20 +1,20 @@
 # Key Vault
 resource "azurerm_key_vault" "main" {
-  name                       = var.key_vault_name
-  resource_group_name        = var.resource_group_name
-  location                   = var.location
+  name                        = var.key_vault_name
+  resource_group_name         = var.resource_group_name
+  location                    = var.location
   enabled_for_disk_encryption = true
-  tenant_id                  = var.tenant_id
-  sku_name                   = "standard"
-  purge_protection_enabled   = true
-  soft_delete_retention_days = 90
+  tenant_id                   = var.tenant_id
+  sku_name                    = "standard"
+  purge_protection_enabled    = true
+  soft_delete_retention_days  = 90
 }
 
 # RBAC - AKS
 resource "azurerm_role_assignment" "kv_account_aks" {
-  scope = azurerm_key_vault.main.id
+  scope                = azurerm_key_vault.main.id
   role_definition_name = "Key Vault Secrets User"
-  principal_id = module.aks.aks_principal_id
+  principal_id         = var.aks_principal_id
 }
 
 # Secret - Speech Key
