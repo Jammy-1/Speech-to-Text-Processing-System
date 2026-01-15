@@ -13,7 +13,7 @@ resource "azurerm_key_vault" "main" {
 # RBAC - AKS
 resource "azurerm_role_assignment" "kv_account_aks" {
   scope = azurerm_key_vault.main.id
-  role_definition_name = "Key Vault Secrets"
+  role_definition_name = "Key Vault Secrets User"
   principal_id = module.aks.aks_principal_id
 }
 
