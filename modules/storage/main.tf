@@ -8,7 +8,7 @@ resource "azurerm_storage_account" "main" {
 
 resource "azurerm_storage_container" "audio" {
   name                  = "audio"
-  storage_account_id    = var.storage_account_name
+  storage_account_id    = azurerm_storage_account.main.id
   container_access_type = "private"
 }
 
