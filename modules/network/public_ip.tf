@@ -9,9 +9,9 @@ resource "azurerm_public_ip" "frontend" {
   sku               = "Standard"
 }
 
-# Public IP - AKS LoadBalancer
-resource "azurerm_public_ip" "aks_lb" {
-  name                = var.public_ip_aks_lb_name
+# Public IP - App Gateway
+resource "azurerm_public_ip" "app_gw" {
+  name                = var.public_ip_app_gw_name
   resource_group_name = var.resource_group_name
   location            = var.location
   tags                = var.tags
