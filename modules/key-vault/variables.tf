@@ -7,9 +7,13 @@ variable "tags" { type = map(string) }
 variable "key_vault_name" { type = string }
 variable "tenant_id" { type = string }
 
+# ACR
+variable "acr_encryption_key_name" { type = string }
+variable "acr_id" { type = string }
+
 # Speech Key 
 variable "speech_key_name" { type = string }
 variable "speech_key" { type = string }
 
-# RBAC 
+# AKS
 variable "aks_principal_id" { type = string }
