@@ -5,7 +5,6 @@ variable "tags" { type = map(string) }
 
 # Vnet
 variable "vnet_name" {}
-variable "storage_dns_link_name" { type = string }
 
 # Subnet
 variable "subnet_name_aks" { type = string }
@@ -20,6 +19,12 @@ variable "app_gw_aks_backend_pool_ip_name" { type = string }
 # Private Endpoint
 variable "private_endpoint_name_storage_pe" { type = string }
 variable "storage_account_id" { type = string }
+variable "private_endpoint_name_speech_pe" { type = string }
+variable "speech_id" { type = string }
+
+# DNS
+variable "storage_dns_link_name" { type = string }
+variable "speech_dns_link_name" { type = string }
 
 # Public Ip
 variable "public_ip_frontend_name" { type = string }
@@ -37,10 +42,10 @@ variable "security_rules_aks" {
     direction                                  = string
     access                                     = string
     protocol                                   = string
-    source_address_prefix                      = optional(string) 
+    source_address_prefix                      = optional(string)
     source_address_prefixes                    = optional(list(string))
     source_application_security_group_ids      = optional(list(string))
-    destination_address_prefix                 = optional(string) 
+    destination_address_prefix                 = optional(string)
     destination_address_prefixes               = optional(list(string))
     destination_application_security_group_ids = optional(list(string))
   }))
@@ -54,10 +59,10 @@ variable "security_rules_ingress" {
     direction                                  = string
     access                                     = string
     protocol                                   = string
-    source_address_prefix                      = optional(string) 
+    source_address_prefix                      = optional(string)
     source_address_prefixes                    = optional(list(string))
     source_application_security_group_ids      = optional(list(string))
-    destination_address_prefix                 = optional(string) 
+    destination_address_prefix                 = optional(string)
     destination_address_prefixes               = optional(list(string))
     destination_application_security_group_ids = optional(list(string))
   }))
