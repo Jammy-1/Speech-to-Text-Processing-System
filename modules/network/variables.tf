@@ -13,6 +13,10 @@ variable "subnet_name_ingress" { type = string }
 variable "private_endpoint_name_storage_pe" { type = string }
 variable "storage_account_id" { type = string }
 
+# Public Ip
+variable "public_ip_frontend_name" { type = string }
+variable "public_ip_aks_lb_name" { type = string }
+
 # NSG
 variable "nsg_name_aks" { type = string }
 variable "nsg_name_ingress" { type = string }
