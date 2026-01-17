@@ -1,9 +1,11 @@
 # Storage Private Endpoint
 resource "azurerm_private_endpoint" "storage_pe" {
   name                = var.private_endpoint_name_storage_pe
-  location            = var.location
   resource_group_name = var.resource_group_name
-  subnet_id           = azurerm_subnet.aks.id
+  location            = var.location
+  tags                = var.tags
+
+  subnet_id = azurerm_subnet.aks.id
 
   private_service_connection {
     name                           = "storage-connection"
@@ -17,5 +19,6 @@ resource "azurerm_private_endpoint" "storage_pe" {
 resource "azurerm_private_dns_zone" "storage_dns" {
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = var.resource_group_name
+  tags                = var.tags
 }
 
