@@ -1,8 +1,10 @@
 # Key Vault
 resource "azurerm_key_vault" "main" {
-  name                        = var.key_vault_name
-  resource_group_name         = var.resource_group_name
-  location                    = var.location
+  name                = var.key_vault_name
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
+
   enabled_for_disk_encryption = true
   tenant_id                   = var.tenant_id
   sku_name                    = "standard"
