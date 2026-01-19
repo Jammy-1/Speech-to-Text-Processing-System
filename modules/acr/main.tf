@@ -30,7 +30,7 @@ resource "azurerm_user_assigned_identity" "acr_uai" {
 
 # RBAC - AKS-ACR
 resource "azurerm_role_assignment" "rbac_aks_acr_pull" {
-  scope                = var.acr_id
+  scope                = azurerm_container_registry.main.id
   role_definition_name = "AcrPull"
   principal_id         = var.aks_uai_principal_id
 }
