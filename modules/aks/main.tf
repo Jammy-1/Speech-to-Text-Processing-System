@@ -30,7 +30,7 @@ resource "azurerm_kubernetes_cluster" "main" {
 
 }
 
-# UAI- ACR
+# UAI- AKS
 resource "azurerm_user_assigned_identity" "aks_uai" {
   name                = var.uai_aks_name
   resource_group_name = var.resource_group_name
@@ -39,8 +39,8 @@ resource "azurerm_user_assigned_identity" "aks_uai" {
 }
 
 # RBAC - AKS
-resource "azurerm_role_assignment" "rbac_aks" {
-  scope                = var.key_vault_id
+resource "azurerm_role_assignment" "rbac_aks_speech_key_access" {
+  scope                = var.rbac_aks_speech_key_access
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_user_assigned_identity.aks_uai.principal_id
 }

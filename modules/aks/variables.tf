@@ -18,6 +18,7 @@ variable "aks_log_workspace_name" { type = string }
 
 # Key Vault
 variable "key_vault_id" { type = string }
+variable "rbac_aks_speech_key_access" { type = string }
 
 # UAI
 variable "uai_aks_name" { type = string }
