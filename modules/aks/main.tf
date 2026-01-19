@@ -38,6 +38,14 @@ resource "azurerm_user_assigned_identity" "aks_uai" {
   tags                = var.tags
 }
 
+# RBAC - AKS
+resource "azurerm_role_assignment" "rbac_aks" {
+  scope                = var.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.aks_uai.principal_id
+}
+
+
 resource "azurerm_log_analytics_workspace" "main" {
   name                = var.aks_log_workspace_name
   location            = var.location
