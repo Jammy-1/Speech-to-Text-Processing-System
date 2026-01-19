@@ -20,10 +20,17 @@ resource "azurerm_container_registry" "main" {
   }
 }
 
-# UAI- ACR
+# UAI - ACR
 resource "azurerm_user_assigned_identity" "acr_uai" {
   name                = var.uai_acr_name
   resource_group_name = var.resource_group_name
   location            = var.location
   tags                = var.tags
+}
+
+# RBAC - AKS-ACR
+resource "azurerm_role_assignment" "rbac_aks_acr_pull" {
+  scope                = var.acr_id
+  role_definition_name = "AcrPull"
+  principal_id         = var.aks_uai_principal_id
 }
