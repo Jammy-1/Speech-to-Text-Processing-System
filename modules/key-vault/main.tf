@@ -12,18 +12,13 @@ resource "azurerm_key_vault" "main" {
   soft_delete_retention_days  = 90
 }
 
-# RBAC - AKS
-resource "azurerm_role_assignment" "rbac_aks" {
-  scope                = azurerm_key_vault.main.id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = var.aks_principal_id
-}
+# Access Control Policy - AKS, Speech, Search
+resource "azurerm_key_vault_access_policy" "aks_speech_search" {
+  key_vault_id = azurerm_key_vault.main.id
+  tenant_id    = var.tenant_id
+  object_id    = var.aks_principal_id
 
-# RBAC - AKS-ACR
-resource "azurerm_role_assignment" "rbac_aks_acr_pull" {
-  scope                = var.acr_id
-  role_definition_name = "AcrPull"
-  principal_id         = var.aks_principal_id
+  secret_permissions = ["Get"]
 }
 
 # Key - ACR Encryption 
@@ -40,9 +35,19 @@ resource "azurerm_key_vault_key" "acr_encryption_key" {
 # Secret - Speech Key
 resource "azurerm_key_vault_secret" "speech_key" {
   name         = var.speech_key_name
-  value        = var.speech_key
+  value        = var.speech_primary_key
   key_vault_id = azurerm_key_vault.main.id
 
   tags = var.tags
 }
+
+# Secret - Search Key
+resource "azurerm_key_vault_secret" "search_key" {
+  name         = var.search_key_name
+  value        = var.search_primary_key
+  key_vault_id = azurerm_key_vault.main.id
+
+  tags = var.tags
+}
+
 

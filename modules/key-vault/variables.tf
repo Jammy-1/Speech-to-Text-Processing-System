@@ -9,11 +9,20 @@ variable "tenant_id" { type = string }
 
 # ACR
 variable "acr_encryption_key_name" { type = string }
-variable "acr_id" { type = string }
-
-# Speech Key 
-variable "speech_key_name" { type = string }
-variable "speech_key" { type = string }
 
 # AKS
 variable "aks_principal_id" { type = string }
+
+# Speech Key 
+variable "speech_key_name" { type = string }
+variable "speech_primary_key" { 
+ type = string 
+ sensitive = true
+}
+
+# Search Key
+variable "search_key_name" { type = string }
+variable "search_primary_key" {
+  type = string
+  sensitive = true
+}
