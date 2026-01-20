@@ -15,14 +15,14 @@ variable "aks_principal_id" { type = string }
 
 # Speech Key 
 variable "speech_key_name" { type = string }
-variable "speech_primary_key" { 
- type = string 
- sensitive = true
+variable "speech_primary_key" {
+  type      = string
+  sensitive = true
 }
 
 # Search Key
 variable "search_key_name" { type = string }
 variable "search_primary_key" {
-  type = string
+  type      = string
   sensitive = true
 }

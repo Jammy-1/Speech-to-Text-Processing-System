@@ -7,3 +7,9 @@ output "acr_encryption_key_id" { value = azurerm_key_vault_key.acr_encryption_ke
 
 # Speech Key
 output "speech_key_name" { value = azurerm_key_vault_secret.speech_key.name }
+output "speech_secret_id" { value = azurerm_key_vault_secret.speech_key.id }
+
+# Search Key 
+output "search_key_name" { value = azurerm_key_vault_secret.search_key.name }
+output "search_secret_id" { value = azurerm_key_vault_secret.search_key.id }
+
