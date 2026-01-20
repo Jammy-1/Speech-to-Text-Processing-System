@@ -38,12 +38,20 @@ resource "azurerm_user_assigned_identity" "aks_uai" {
   tags                = var.tags
 }
 
-# RBAC - AKS
+# RBAC - Speech Key Access
 resource "azurerm_role_assignment" "rbac_aks_speech_key_access" {
   scope                = var.rbac_aks_speech_key_access
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_user_assigned_identity.aks_uai.principal_id
 }
+
+# RBAC - Search Key Access
+resource "azurerm_role_assignment" "rbac_aks_search_key_access" {
+  scope                = var.rbac_aks_search_key_access
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.aks_uai.principal_id
+}
+
 
 
 resource "azurerm_log_analytics_workspace" "main" {

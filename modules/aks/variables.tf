@@ -16,12 +16,13 @@ variable "aks_node_size" { type = string }
 
 variable "aks_log_workspace_name" { type = string }
 
+# UAI
+variable "uai_aks_name" { type = string }
+
 # Key Vault
 variable "key_vault_id" { type = string }
 variable "rbac_aks_speech_key_access" { type = string }
-
-# UAI
-variable "uai_aks_name" { type = string }
+variable "rbac_aks_search_key_access" { type = string }
 
 # ACR
 variable "acr_id" { type = string }
