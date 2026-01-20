@@ -18,13 +18,19 @@ variable "app_gw_aks_backend_pool_ip_name" { type = string }
 
 # Private Endpoint
 variable "private_endpoint_name_storage_pe" { type = string }
-variable "storage_account_id" { type = string }
 variable "private_endpoint_name_speech_pe" { type = string }
+variable "private_endpoint_name_search_pe" { type = string }
+variable "storage_account_id" { type = string }
 variable "speech_id" { type = string }
+variable "search_id" { type = string }
 
 # DNS
 variable "storage_dns_link_name" { type = string }
 variable "speech_dns_link_name" { type = string }
+variable "search_dns_link_name" { type = string }
+variable "storage_dns_group_name" { type = string }
+variable "speech_dns_group_name" { type = string }
+variable "search_dns_group_name" { type = string }
 
 # Public Ip
 variable "public_ip_frontend_name" { type = string }
