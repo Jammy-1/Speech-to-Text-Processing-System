@@ -14,9 +14,9 @@ resource "azurerm_private_endpoint" "storage_pe" {
     subresource_names              = ["blob"]
   }
 
-   private_dns_zone_group {
-    name = var.storage_dns_group_name
-    private_dns_zone_ids = [ azurerm_private_dns_zone.storage_dns.id ]
+  private_dns_zone_group {
+    name                 = var.storage_dns_group_name
+    private_dns_zone_ids = [azurerm_private_dns_zone.storage_dns.id]
   }
 }
 
@@ -25,9 +25,9 @@ resource "azurerm_private_endpoint" "speech_pe" {
   name                = var.private_endpoint_name_speech_pe
   resource_group_name = var.resource_group_name
   location            = var.location
-  tags = var.tags
+  tags                = var.tags
 
-  subnet_id           = azurerm_subnet.pe.id
+  subnet_id = azurerm_subnet.pe.id
 
   private_service_connection {
     name                           = "speech-psc"
@@ -36,9 +36,9 @@ resource "azurerm_private_endpoint" "speech_pe" {
     subresource_names              = ["speech"]
   }
 
-     private_dns_zone_group {
-    name = var.speech_dns_group_name
-    private_dns_zone_ids = [ azurerm_private_dns_zone.speech_dns.id ]
+  private_dns_zone_group {
+    name                 = var.speech_dns_group_name
+    private_dns_zone_ids = [azurerm_private_dns_zone.speech_dns.id]
   }
 }
 
@@ -47,9 +47,9 @@ resource "azurerm_private_endpoint" "search_pe" {
   name                = var.private_endpoint_name_search_pe
   resource_group_name = var.resource_group_name
   location            = var.location
-  tags = var.tags
+  tags                = var.tags
 
-  subnet_id           = azurerm_subnet.pe.id
+  subnet_id = azurerm_subnet.pe.id
 
   private_service_connection {
     name                           = "search-psc"
@@ -59,8 +59,8 @@ resource "azurerm_private_endpoint" "search_pe" {
   }
 
   private_dns_zone_group {
-    name = var.search_dns_group_name
-    private_dns_zone_ids = [ azurerm_private_dns_zone.search_dns.id ]
+    name                 = var.search_dns_group_name
+    private_dns_zone_ids = [azurerm_private_dns_zone.search_dns.id]
   }
 }
 
