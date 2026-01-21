@@ -38,31 +38,31 @@ resource "azurerm_network_security_group" "monitoring_nsg" {
   tags                = var.tags
 }
 
-# AKS Assocation To NSG
+# AKS Association To NSG
 resource "azurerm_subnet_network_security_group_association" "nsg_assoc_aks" {
   subnet_id                 = azurerm_subnet.aks.id
   network_security_group_id = azurerm_network_security_group.aks_nsg.id
 }
 
-# Ingress Assocation To NSG
+# Ingress Association To NSG
 resource "azurerm_subnet_network_security_group_association" "nsg_assoc_ingress" {
   subnet_id                 = azurerm_subnet.ingress.id
   network_security_group_id = azurerm_network_security_group.ingress_nsg.id
 }
 
-# Private Endpoint Assocation To NSG
+# Private Endpoint Association To NSG
 resource "azurerm_subnet_network_security_group_association" "nsg_assoc_pe" {
   subnet_id                 = azurerm_subnet.pe.id
   network_security_group_id = azurerm_network_security_group.pe_nsg.id
 }
 
-# Queue Assocation To NSG
+# Queue Association To NSG
 resource "azurerm_subnet_network_security_group_association" "nsg_assoc_queue" {
   subnet_id                 = azurerm_subnet.queue.id
   network_security_group_id = azurerm_network_security_group.queue_nsg.id
 }
 
-# Monitoring Assocation To NSG
+# Monitoring Association To NSG
 resource "azurerm_subnet_network_security_group_association" "nsg_assoc_monitoring" {
   subnet_id                 = azurerm_subnet.monitoring.id
   network_security_group_id = azurerm_network_security_group.monitoring_nsg.id
