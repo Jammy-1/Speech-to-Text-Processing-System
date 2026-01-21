@@ -5,7 +5,7 @@ resource "azurerm_private_endpoint" "storage_pe" {
   location            = var.location
   tags                = var.tags
 
-  subnet_id = azurerm_subnet.aks.id
+  subnet_id = azurerm_subnet.pe.id
 
   private_service_connection {
     name                           = "storage-connection"
@@ -27,7 +27,7 @@ resource "azurerm_private_endpoint" "speech_pe" {
   location            = var.location
   tags = var.tags
 
-  subnet_id           = azurerm_subnet.aks.id
+  subnet_id           = azurerm_subnet.pe.id
 
   private_service_connection {
     name                           = "speech-psc"
@@ -49,7 +49,7 @@ resource "azurerm_private_endpoint" "search_pe" {
   location            = var.location
   tags = var.tags
 
-  subnet_id           = azurerm_subnet.aks.id
+  subnet_id           = azurerm_subnet.pe.id
 
   private_service_connection {
     name                           = "search-psc"
