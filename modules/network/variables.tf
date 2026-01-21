@@ -9,6 +9,9 @@ variable "vnet_name" {}
 # Subnet
 variable "subnet_name_aks" { type = string }
 variable "subnet_name_ingress" { type = string }
+variable "subnet_name_pe" { type = string }
+variable "subnet_name_queue" { type = string }
+variable "subnet_name_monitoring" { type = string }
 
 # Application Gateway
 variable "app_gw_name" { type = string }
@@ -39,6 +42,10 @@ variable "public_ip_app_gw_name" { type = string }
 # NSG
 variable "nsg_name_aks" { type = string }
 variable "nsg_name_ingress" { type = string }
+variable "nsg_name_pe" { type = string }
+variable "nsg_name_queue" { type = string }
+variable "nsg_name_monitoring" { type = string }
+
 
 # NSG Rules - AKS
 variable "security_rules_aks" {

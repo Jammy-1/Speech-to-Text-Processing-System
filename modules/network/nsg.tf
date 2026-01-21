@@ -14,6 +14,30 @@ resource "azurerm_network_security_group" "ingress_nsg" {
   tags                = var.tags
 }
 
+# NSG - Private Endpoint
+resource "azurerm_network_security_group" "pe_nsg" {
+  name                = var.nsg_name_pe
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
+}
+
+# NSG - Queue
+resource "azurerm_network_security_group" "queue_nsg" {
+  name                = var.nsg_name_pe
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
+}
+
+# NSG - Monitoring
+resource "azurerm_network_security_group" "monitoring_nsg" {
+  name                = var.nsg_name_monitoring
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
+}
+
 # AKS Assocation To NSG
 resource "azurerm_subnet_network_security_group_association" "nsg_assoc_aks" {
   subnet_id                 = azurerm_subnet.aks.id
@@ -25,3 +49,22 @@ resource "azurerm_subnet_network_security_group_association" "nsg_assoc_ingress"
   subnet_id                 = azurerm_subnet.ingress.id
   network_security_group_id = azurerm_network_security_group.ingress_nsg.id
 }
+
+# Private Endpoint Assocation To NSG
+resource "azurerm_subnet_network_security_group_association" "nsg_assoc_pe" {
+  subnet_id                 = azurerm_subnet.pe.id
+  network_security_group_id = azurerm_network_security_group.pe_nsg.id
+}
+
+# Queue Assocation To NSG
+resource "azurerm_subnet_network_security_group_association" "nsg_assoc_queue" {
+  subnet_id                 = azurerm_subnet.queue.id
+  network_security_group_id = azurerm_network_security_group.queue_nsg.id
+}
+
+# Monitoring Assocation To NSG
+resource "azurerm_subnet_network_security_group_association" "nsg_assoc_monitoring" {
+  subnet_id                 = azurerm_subnet.monitoring.id
+  network_security_group_id = azurerm_network_security_group.monitoring_nsg.id
+}
+
