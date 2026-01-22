@@ -18,7 +18,12 @@ resource "azurerm_kubernetes_cluster" "main" {
     auto_scaling_enabled = true
     min_count            = var.aks_node_scaling_min
     max_count            = var.aks_node_scaling_max
+  }
 
+  network_profile {
+    network_plugin    = "azure"
+    network_policy    = "azure"
+    load_balancer_sku = "standard"
   }
 
   monitor_metrics {
@@ -52,11 +57,10 @@ resource "azurerm_role_assignment" "rbac_aks_search_key_access" {
   principal_id         = azurerm_user_assigned_identity.aks_uai.principal_id
 }
 
-
-
 resource "azurerm_log_analytics_workspace" "main" {
   name                = var.aks_log_workspace_name
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = "PerGB2018"
+  tags                = var.tags
 }
