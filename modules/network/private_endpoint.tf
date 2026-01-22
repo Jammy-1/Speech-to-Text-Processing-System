@@ -64,3 +64,24 @@ resource "azurerm_private_endpoint" "search_pe" {
   }
 }
 
+# Private Endpoint - Queue
+resource "azurerm_private_endpoint" "queue_pe" {
+  name                = var.private_endpoint_name_queue_pe
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
+
+  subnet_id = azurerm_subnet.queue.id
+
+  private_service_connection {
+    name                           = "queue-psc"
+    is_manual_connection           = false
+    private_connection_resource_id = var.service_bus_id
+    subresource_names              = ["namespace"]
+  }
+
+  private_dns_zone_group {
+    name                 = var.queue_dns_group_name
+    private_dns_zone_ids = [azurerm_private_dns_zone.queue_dns.id]
+  }
+}

@@ -37,3 +37,13 @@ resource "azurerm_private_dns_zone_virtual_network_link" "search_link" {
   private_dns_zone_name = azurerm_private_dns_zone.search_dns.name
   virtual_network_id    = azurerm_virtual_network.main.id
 }
+
+# DNS / VNet Link - Queue
+resource "azurerm_private_dns_zone_virtual_network_link" "queue_link" {
+  name                = var.queue_dns_link_name
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
+
+  private_dns_zone_name = azurerm_private_dns_zone.queue_dns.name
+  virtual_network_id    = azurerm_virtual_network.main.id
+}
