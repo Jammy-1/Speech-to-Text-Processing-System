@@ -10,7 +10,7 @@ resource "azurerm_cognitive_account" "speech_service" {
 
   outbound_network_access_restricted = "true"
   public_network_access_enabled      = "false"
-  
+
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.cognitive_account_uai.id]
@@ -22,17 +22,17 @@ resource "azurerm_search_service" "search_service" {
   name                = var.search_service_name
   resource_group_name = var.resource_group_name
   location            = var.location
-  tags = var.tags
+  tags                = var.tags
 
-  sku                 = "basic"
-  replica_count       = 1
-  partition_count     = 1
+  sku             = "basic"
+  replica_count   = 1
+  partition_count = 1
 
   public_network_access_enabled = false
-  network_rule_bypass_option = "None"
+  network_rule_bypass_option    = "None"
 
   identity {
-    type = "SystemAssigned"
+    type         = "SystemAssigned"
     identity_ids = [azurerm_user_assigned_identity.search_service_uai.id]
   }
 }
