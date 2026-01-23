@@ -8,3 +8,12 @@ variable "service_bus_name" { type = string }
 
 # AKS
 variable "aks_uai_principal_id" { type = string }
+
+# Speech 
+variable "speech_queue_name" { type = string }
+
+# Search
+variable "search_queue_name" { type = string }
+
+# Storage 
+variable "storage_queue_name" { type = string }
