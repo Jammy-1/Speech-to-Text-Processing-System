@@ -1,25 +1,3 @@
-# Private Endpoint - Storage
-resource "azurerm_private_endpoint" "storage_pe" {
-  name                = var.private_endpoint_name_storage_pe
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  tags                = var.tags
-
-  subnet_id = azurerm_subnet.pe.id
-
-  private_service_connection {
-    name                           = "storage-connection"
-    is_manual_connection           = false
-    private_connection_resource_id = var.storage_account_id
-    subresource_names              = ["blob"]
-  }
-
-  private_dns_zone_group {
-    name                 = var.storage_dns_group_name
-    private_dns_zone_ids = [azurerm_private_dns_zone.storage_dns.id]
-  }
-}
-
 # Private Endpoint - Speech
 resource "azurerm_private_endpoint" "speech_pe" {
   name                = var.private_endpoint_name_speech_pe
@@ -61,6 +39,28 @@ resource "azurerm_private_endpoint" "search_pe" {
   private_dns_zone_group {
     name                 = var.search_dns_group_name
     private_dns_zone_ids = [azurerm_private_dns_zone.search_dns.id]
+  }
+}
+
+# Private Endpoint - Storage
+resource "azurerm_private_endpoint" "storage_pe" {
+  name                = var.private_endpoint_name_storage_pe
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
+
+  subnet_id = azurerm_subnet.pe.id
+
+  private_service_connection {
+    name                           = "storage-connection"
+    is_manual_connection           = false
+    private_connection_resource_id = var.storage_account_id
+    subresource_names              = ["blob"]
+  }
+
+  private_dns_zone_group {
+    name                 = var.storage_dns_group_name
+    private_dns_zone_ids = [azurerm_private_dns_zone.storage_dns.id]
   }
 }
 

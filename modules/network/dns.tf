@@ -1,10 +1,3 @@
-# Private DNS - Storage
-resource "azurerm_private_dns_zone" "storage_dns" {
-  name                = "privatelink.blob.core.windows.net"
-  resource_group_name = var.resource_group_name
-  tags                = var.tags
-}
-
 # Private DNS - Speech
 resource "azurerm_private_dns_zone" "speech_dns" {
   name                = "privatelink.cognitiveservices.azure.com"
@@ -18,6 +11,14 @@ resource "azurerm_private_dns_zone" "search_dns" {
   resource_group_name = var.resource_group_name
   tags                = var.tags
 }
+
+# Private DNS - Storage
+resource "azurerm_private_dns_zone" "storage_dns" {
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
+}
+
 
 # Private DNS - Queue
 resource "azurerm_private_dns_zone" "queue_dns" {
