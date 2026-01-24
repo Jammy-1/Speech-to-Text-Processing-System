@@ -28,9 +28,24 @@ resource "azurerm_user_assigned_identity" "acr_uai" {
   tags                = var.tags
 }
 
-# RBAC - AKS-ACR
+# UAI - CI/CD
+resource "azurerm_user_assigned_identity" "ci_cd_uai" {
+  name                = var.uai_ci_cd_name
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
+}
+
+# RBAC - AKS Pull ACR Container
 resource "azurerm_role_assignment" "rbac_aks_acr_pull" {
   scope                = azurerm_container_registry.main.id
   role_definition_name = "AcrPull"
   principal_id         = var.aks_uai_principal_id
+}
+
+# RBAC - CI/CD 
+resource "azurerm_role_assignment" "rbac_ci_cd_acr" {
+  scope                = azurerm_container_registry.main.id
+  role_definition_name = "AcrPush"
+  principal_id         = azurerm_user_assigned_identity.ci_cd_uai.principal_id
 }
