@@ -16,9 +16,3 @@ variable "aks_uai_principal_id" { type = string }
 
 # Key Vault
 variable "key_vault_id" { type = string }
-
-# Worker Images
-variable "speech_worker_image" { type = string }
-variable "search_worker_image" { type = string }
-variable "storage_worker_image" { type = string }
-variable "api_image" { type = string }
