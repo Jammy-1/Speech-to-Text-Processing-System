@@ -3,7 +3,7 @@ resource "kubernetes_namespace_v1" "speech" {
   metadata {
     name = "speech-worker"
     labels = {
-      environment = "prod"
+      environment = var.k8_environment
       team        = "speech-processing"
     }
   }
@@ -18,8 +18,26 @@ resource "kubernetes_config_map_v1" "speech_config_map" {
 
   data = {
     SPEECH_ENDPOINT          = "https://${var.cognitive_account_name}.cognitiveservices.azure.com/"
-    SERVICE_BUS_QUEUE_SPEECH = var.speech_queue_name
+    SPEECH_REGION            = var.location
+    SERVICE_BUS_NAMESPACE    = var.service_bus_namespace
+    SERVICE_BUS_QUEUE_SPEECH = var.speech_queue
+    STORAGE_ACCOUNT_NAME     = var.storage_account_name
+    STORAGE_CONTAINER_NAME   = var.transcripts_container_name
   }
+}
+
+# Secret - Speech
+resource "kubernetes_secret_v1" "speech_secret" {
+  metadata {
+    name      = "speech-secrets"
+    namespace = kubernetes_namespace_v1.speech.metadata[0].name
+  }
+
+  data = {
+    SPEECH_KEY = var.speech_key
+  }
+
+  type = "Opaque"
 }
 
 # Deployment - Speech 
@@ -60,6 +78,12 @@ resource "kubernetes_deployment_v1" "speech_worker" {
           env_from {
             config_map_ref {
               name = kubernetes_config_map_v1.speech_config_map.metadata[0].name
+            }
+          }
+
+          env_from {
+            secret_ref {
+              name = kubernetes_secret_v1.speech_secret.metadata[0].name
             }
           }
         }
