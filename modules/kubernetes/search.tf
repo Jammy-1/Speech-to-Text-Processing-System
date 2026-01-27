@@ -1,10 +1,12 @@
 # Namespace - Search 
 resource "kubernetes_namespace_v1" "search" {
   metadata {
-    name = "search-worker"
     labels = {
-      environment = var.k8_environment
-      team        = "search-processing"
+      "app.kubernetes.io/name"        = var.k8_label_project_name
+      "app.kubernetes.io/environment" = var.k8_environment
+      "app.kubernetes.io/component"   = "search"
+      "app.kubernetes.io/part-of"     = "search-processing"
+      "app.kubernetes.io/managed-by"  = "engineering"
     }
   }
 }
