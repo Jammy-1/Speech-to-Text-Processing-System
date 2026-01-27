@@ -3,8 +3,11 @@ resource "kubernetes_namespace_v1" "storage" {
   metadata {
     name = "storage-worker"
     labels = {
-      environment = "prod"
-      team        = "storage-processing"
+      "app.kubernetes.io/name"        = "storage-worker"
+      "app.kubernetes.io/environment" = var.k8_environment
+      "app.kubernetes.io/component"   = "speech"
+      "app.kubernetes.io/part-of"     = "speech-platform"
+      "app.kubernetes.io/managed-by"  = "engineering"
     }
   }
 }
