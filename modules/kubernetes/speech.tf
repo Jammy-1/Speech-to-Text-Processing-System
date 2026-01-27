@@ -1,10 +1,12 @@
 # Namespace - Speech
 resource "kubernetes_namespace_v1" "speech" {
   metadata {
-    name = "speech-worker"
-    labels = {
-      environment = var.k8_environment
-      team        = "speech-processing"
+   labels = {
+      "app.kubernetes.io/name"       = "stt-processing"
+      "app.kubernetes.io/environment" = var.k8_environment
+      "app.kubernetes.io/component"  = "speech"
+      "app.kubernetes.io/part-of"    = "speech-platform"
+      "app.kubernetes.io/managed-by" = "engineering"
     }
   }
 }
