@@ -3,7 +3,7 @@ resource "kubernetes_namespace_v1" "search" {
   metadata {
     name = "search-worker"
     labels = {
-      environment = "prod"
+      environment = var.k8_environment
       team        = "search-processing"
     }
   }
@@ -17,9 +17,13 @@ resource "kubernetes_config_map_v1" "search_config_map" {
   }
 
   data = {
-    SEARCH_ENDPOINT   = "https://${var.search_service_name}.search.windows.net"
-    SEARCH_INDEX_NAME = var.search_index_name
-    SERVICE_BUS_QUEUE = var.search_queue_name
+    SEARCH_ENDPOINT          = "https://${var.search_service_name}.search.windows.net"
+    SEARCH_REGION            = var.location
+    SEARCH_INDEX_NAME        = var.search_index_name
+    SERVICE_BUS_NAMESPACE    = var.service_bus_namespace
+    SERVICE_BUS_QUEUE_SEARCH = var.search_queue
+    STORAGE_ACCOUNT_NAME     = var.storage_account_name
+    STORAGE_CONTAINER_NAME   = var.transcripts_container_name
   }
 }
 
@@ -68,3 +72,4 @@ resource "kubernetes_deployment_v1" "search_worker" {
     }
   }
 }
+
