@@ -1,5 +1,8 @@
 # General
 variable "tags" { type = map(string) }
+variable "location" { type = string }
+variable "k8_environment" { type = string }
+variable "k8_label_project_name" { type = string }
 
 # Config Map 
 variable "cognitive_account_name" { type = string }
@@ -20,18 +23,19 @@ variable "kube_cluster_ca_certificate" { type = string }
 
 # Storage 
 variable "storage_account_name" { type = string }
-variable "storage_queue_name" { type = string }
+variable "storage_queue" { type = string }
 
 # Cognitive
 variable "search_service_name" { type = string }
 
 # Service Bus 
 variable "service_bus_name" { type = string }
+variable "service_bus_namespace" { type = string }
 
 # Speech 
-variable "speech_key_name" { type = string }
-variable "speech_queue_name" { type = string }
+variable "speech_key" { type = string }
+variable "speech_queue" { type = string }
 
 # Search 
-variable "search_queue_name" { type = string }
+variable "search_queue" { type = string }
 
