@@ -17,9 +17,11 @@ resource "kubernetes_config_map_v1" "storage_config_map" {
   }
 
   data = {
-    STORAGE_ACCOUNT_NAME   = var.storage_account_name
-    STORAGE_CONTAINER_NAME = var.transcripts_container_name
-    SERVICE_BUS_QUEUE      = var.storage_queue_name
+    STORAGE_ACCOUNT_NAME      = var.storage_account_name
+    STORAGE_CONTAINER_NAME    = var.transcripts_container_name
+    STORAGE_REGION            = var.location
+    SERVICE_BUS_NAMESPACE     = var.service_bus_namespace
+    SERVICE_BUS_QUEUE_STORAGE = var.storage_queue
   }
 }
 
