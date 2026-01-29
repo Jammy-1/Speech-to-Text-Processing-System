@@ -24,7 +24,7 @@ resource "azurerm_subnet" "pe" {
   address_prefixes     = ["10.0.3.0/24"]
 }
 
-# Subnet -Queue
+# Subnet - Queue
 resource "azurerm_subnet" "queue" {
   name                 = var.subnet_name_queue
   resource_group_name  = var.resource_group_name
@@ -40,3 +40,10 @@ resource "azurerm_subnet" "monitoring" {
   address_prefixes     = ["10.0.5.0/28"]
 }
 
+# Subnet - ACR
+resource "azurerm_subnet" "acr" {
+  name                 = var.subnet_name_acr
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.6.0/28"]
+}

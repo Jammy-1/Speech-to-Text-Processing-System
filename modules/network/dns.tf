@@ -26,3 +26,10 @@ resource "azurerm_private_dns_zone" "queue_dns" {
   resource_group_name = var.resource_group_name
   tags                = var.tags
 }
+
+# Private DNS - ACR
+resource "azurerm_private_dns_zone" "acr_dns" {
+  name                = "privatelink.servicebus.windows.net"
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
+}

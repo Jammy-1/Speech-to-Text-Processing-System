@@ -85,3 +85,27 @@ resource "azurerm_private_endpoint" "queue_pe" {
     private_dns_zone_ids = [azurerm_private_dns_zone.queue_dns.id]
   }
 }
+
+
+# Private Endpoint - ACR
+resource "azurerm_private_endpoint" "acr_pe" {
+  name                = var.private_endpoint_name_acr_pe
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
+
+  subnet_id = azurerm_subnet.acr.id
+
+  private_service_connection {
+    name                           = "acr-psc"
+    is_manual_connection           = false
+    private_connection_resource_id = var.service_bus_id
+    subresource_names              = ["namespace"]
+  }
+
+  private_dns_zone_group {
+    name                 = var.acr_dns_group_name
+    private_dns_zone_ids = [azurerm_private_dns_zone.acr_dns.id]
+  }
+}
+
