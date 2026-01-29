@@ -54,6 +54,9 @@ variable "speech_worker_image" { type = string }
 variable "search_worker_image" { type = string }
 variable "storage_worker_image" { type = string }
 
+# K8 - API 
+variable "uai_name_api" { type = string }
+
 # Storage 
 variable "storage_account_name" { type = string }
 
@@ -78,6 +81,7 @@ variable "subnet_name_ingress" { type = string }
 variable "subnet_name_pe" { type = string }
 variable "subnet_name_queue" { type = string }
 variable "subnet_name_monitoring" { type = string }
+variable "subnet_name_acr" { type = string }
 
 # Application Gateway
 variable "app_gw_name" { type = string }
@@ -94,6 +98,7 @@ variable "private_endpoint_name_storage_pe" { type = string }
 variable "private_endpoint_name_speech_pe" { type = string }
 variable "private_endpoint_name_search_pe" { type = string }
 variable "private_endpoint_name_queue_pe" { type = string }
+variable "private_endpoint_name_acr_pe" { type = string }
 
 # DNS
 variable "storage_dns_link_name" { type = string }
@@ -101,10 +106,12 @@ variable "speech_dns_link_name" { type = string }
 variable "search_dns_link_name" { type = string }
 variable "storage_dns_group_name" { type = string }
 variable "queue_dns_link_name" { type = string }
+variable "acr_dns_link_name" { type = string }
 
 variable "speech_dns_group_name" { type = string }
 variable "search_dns_group_name" { type = string }
 variable "queue_dns_group_name" { type = string }
+variable "acr_dns_group_name" { type = string }
 
 # NSG
 variable "nsg_name_aks" { type = string }

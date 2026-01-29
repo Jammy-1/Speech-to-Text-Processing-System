@@ -64,25 +64,28 @@ module "network" {
   subnet_name_pe         = var.subnet_name_pe
   subnet_name_queue      = var.subnet_name_pe
   subnet_name_monitoring = var.subnet_name_pe
+  subnet_name_acr = var.subnet_name_acr
 
   # Storage DNS Link
   storage_dns_link_name = var.storage_dns_link_name
   speech_dns_link_name  = var.speech_dns_link_name
   search_dns_link_name  = var.search_dns_link_name
   queue_dns_link_name   = var.queue_dns_link_name
+  acr_dns_link_name = var.acr_dns_link_name
 
   # Storage DNS Group
   storage_dns_group_name = var.storage_dns_group_name
   speech_dns_group_name  = var.speech_dns_group_name
   search_dns_group_name  = var.search_dns_group_name
   queue_dns_group_name   = var.queue_dns_group_name
-
+  acr_dns_group_name = var.acr_dns_group_name
 
   # Private Endpoint
   private_endpoint_name_storage_pe = var.private_endpoint_name_storage_pe
   private_endpoint_name_speech_pe  = var.private_endpoint_name_speech_pe
   private_endpoint_name_search_pe  = var.private_endpoint_name_search_pe
   private_endpoint_name_queue_pe   = var.private_endpoint_name_queue_pe
+  private_endpoint_name_acr_pe = var.private_endpoint_name_acr_pe
 
   # Application Gateway 
   app_gw_name                     = var.app_gw_name
@@ -129,10 +132,13 @@ module "acr" {
 # K8
 module "k8" {
   source                = "./modules/kubernetes"
+  resource_group_name = var.resource_group_name
   location              = var.location
   k8_environment        = var.k8_environment
   k8_label_project_name = var.k8_label_project_name
 
+  # AKS
+  aks_oidc = module.aks.aks_oidc
 
   # Provider
   kube_host                   = module.aks.kube_host
@@ -140,12 +146,16 @@ module "k8" {
   kube_client_key             = module.aks.kube_client_key
   kube_cluster_ca_certificate = module.aks.kube_cluster_ca_certificate
 
+  # API
+  uai_name_api = var.uai_name_api
+
   # Cognitive 
   cognitive_account_name = var.cognitive_account_name
   search_index_name      = module.cognitive.transcripts_index_name
 
   # Speech
   speech_key      = module.cognitive.speech_primary_key
+  speech_queue_id = module.cognitive.speech_id
 
   # Search
 
