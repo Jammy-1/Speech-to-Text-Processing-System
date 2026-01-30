@@ -1,6 +1,7 @@
 # AKS
 output "aks_cluster_name" { value = azurerm_kubernetes_cluster.main.name }
 output "aks_principal_id" { value = azurerm_kubernetes_cluster.main.identity[0].principal_id }
+output "aks_oidc" { value = azurerm_kubernetes_cluster.main.oidc_issuer_url }
 
 # Outputs For K8's Provider
 output "kube_host" { value = azurerm_kubernetes_cluster.main.kube_admin_config[0].host }
