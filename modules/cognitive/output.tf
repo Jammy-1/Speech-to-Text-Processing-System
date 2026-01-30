@@ -1,5 +1,6 @@
 # Speech
 output "speech_id" { value = azurerm_cognitive_account.speech_service.id }
+output "speech_name" { value = azurerm_cognitive_account.speech_service.name }
 output "speech_endpoint" { value = azurerm_cognitive_account.speech_service.endpoint }
 
 # Search
