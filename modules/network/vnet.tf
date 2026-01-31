@@ -14,7 +14,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "speech_link" {
   resource_group_name = var.resource_group_name
   tags                = var.tags
 
-  private_dns_zone_name = azurerm_private_dns_zone.search_dns.name
+  private_dns_zone_name = azurerm_private_dns_zone.speech_dns.name
   virtual_network_id    = azurerm_virtual_network.main.id
 }
 
