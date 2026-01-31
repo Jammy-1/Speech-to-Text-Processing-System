@@ -24,7 +24,7 @@ resource "azurerm_network_security_group" "pe_nsg" {
 
 # NSG - Queue
 resource "azurerm_network_security_group" "queue_nsg" {
-  name                = var.nsg_name_pe
+  name                = var.nsg_name_queue
   resource_group_name = var.resource_group_name
   location            = var.location
   tags                = var.tags
@@ -44,11 +44,6 @@ resource "azurerm_subnet_network_security_group_association" "nsg_assoc_aks" {
   network_security_group_id = azurerm_network_security_group.aks_nsg.id
 }
 
-# Ingress Association To NSG
-resource "azurerm_subnet_network_security_group_association" "nsg_assoc_ingress" {
-  subnet_id                 = azurerm_subnet.ingress.id
-  network_security_group_id = azurerm_network_security_group.ingress_nsg.id
-}
 
 # Private Endpoint Association To NSG
 resource "azurerm_subnet_network_security_group_association" "nsg_assoc_pe" {
