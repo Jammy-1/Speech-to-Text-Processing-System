@@ -18,6 +18,8 @@ resource "azurerm_private_endpoint" "speech_pe" {
     name                 = var.speech_dns_group_name
     private_dns_zone_ids = [azurerm_private_dns_zone.speech_dns.id]
   }
+
+  depends_on = [ azurerm_private_dns_zone.speech_dns, var.speech_id ]
 }
 
 # Private Endpoint - Search
@@ -33,13 +35,15 @@ resource "azurerm_private_endpoint" "search_pe" {
     name                           = "search-psc"
     is_manual_connection           = false
     private_connection_resource_id = var.search_id
-    subresource_names              = ["search"]
+    subresource_names              = ["searchService"]
   }
 
   private_dns_zone_group {
     name                 = var.search_dns_group_name
     private_dns_zone_ids = [azurerm_private_dns_zone.search_dns.id]
   }
+
+  depends_on = [ azurerm_private_dns_zone.search_dns, var.search_id ]
 }
 
 # Private Endpoint - Storage
@@ -62,6 +66,8 @@ resource "azurerm_private_endpoint" "storage_pe" {
     name                 = var.storage_dns_group_name
     private_dns_zone_ids = [azurerm_private_dns_zone.storage_dns.id]
   }
+
+  depends_on = [ azurerm_private_dns_zone.storage_dns, var.storage_account_id ]
 }
 
 # Private Endpoint - Queue
@@ -84,6 +90,8 @@ resource "azurerm_private_endpoint" "queue_pe" {
     name                 = var.queue_dns_group_name
     private_dns_zone_ids = [azurerm_private_dns_zone.queue_dns.id]
   }
+
+  depends_on = [ azurerm_private_dns_zone.queue_dns, var.service_bus_id ]
 }
 
 
@@ -100,12 +108,14 @@ resource "azurerm_private_endpoint" "acr_pe" {
     name                           = "acr-psc"
     is_manual_connection           = false
     private_connection_resource_id = var.service_bus_id
-    subresource_names              = ["namespace"]
+    subresource_names              = ["registry"]
   }
 
   private_dns_zone_group {
     name                 = var.acr_dns_group_name
     private_dns_zone_ids = [azurerm_private_dns_zone.acr_dns.id]
   }
+
+  depends_on = [ azurerm_private_dns_zone.acr_dns, var.acr_id]
 }
 
