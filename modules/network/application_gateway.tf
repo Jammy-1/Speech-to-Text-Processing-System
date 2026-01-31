@@ -6,9 +6,13 @@ resource "azurerm_application_gateway" "appgw" {
   tags                = var.tags
 
   sku {
-    name     = "WAF_v2"
-    tier     = "WAF_v2"
-    capacity = 2
+    name = "Standard_v2"
+    tier = "Standard_v2"
+  }
+
+  autoscale_configuration {
+    min_capacity = "1"
+    max_capacity = "2"
   }
 
   gateway_ip_configuration {
@@ -51,6 +55,7 @@ resource "azurerm_application_gateway" "appgw" {
 
   request_routing_rule {
     name                       = "route-http-to-aks-backend"
+    priority                   = 100
     rule_type                  = "Basic"
     http_listener_name         = "http-listener"
     backend_address_pool_name  = var.app_gw_aks_backend_pool_ip_name
