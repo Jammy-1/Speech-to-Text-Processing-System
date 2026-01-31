@@ -11,6 +11,12 @@ resource "azurerm_network_security_rule" "aks_rules" {
   access    = each.value.access
   protocol  = each.value.protocol
 
+  source_port_range      = lookup(each.value, "source_port_range", "*")
+  destination_port_range = lookup(each.value, "destination_port_range", "*")
+
+  source_port_ranges      = lookup(each.value, "source_port_ranges", "*")
+  destination_port_ranges = lookup(each.value, "destination_port_ranges", ["*"])
+
   # Source
   source_address_prefix                 = lookup(each.value, "source_address_prefix", null)
   source_address_prefixes               = lookup(each.value, "source_address_prefixes", null)
@@ -40,6 +46,9 @@ resource "azurerm_network_security_rule" "ingress_rules" {
 
   source_port_range      = lookup(each.value, "source_port_range", "*")
   destination_port_range = lookup(each.value, "destination_port_range", "*")
+
+  source_port_ranges      = lookup(each.value, "source_port_ranges", "*")
+  destination_port_ranges = lookup(each.value, "destination_port_ranges", ["*"])
 
   # Source
   source_address_prefix                 = lookup(each.value, "source_address_prefix", null)
