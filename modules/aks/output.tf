@@ -1,13 +1,13 @@
 # AKS
 output "aks_cluster_name" { value = azurerm_kubernetes_cluster.main.name }
-output "aks_principal_id" { 
- value = azurerm_user_assigned_identity.aks_uai.principal_id 
- sensitive = true
+output "aks_principal_id" {
+  value     = azurerm_user_assigned_identity.aks_uai.principal_id
+  sensitive = true
 }
 
-output "aks_oidc" { 
- value = azurerm_kubernetes_cluster.main.oidc_issuer_url
- sensitive = true
+output "aks_oidc" {
+  value     = azurerm_kubernetes_cluster.main.oidc_issuer_url
+  sensitive = true
 }
 
 # Outputs For K8's Provider
