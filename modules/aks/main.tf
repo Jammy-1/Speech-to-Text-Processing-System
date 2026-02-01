@@ -2,8 +2,13 @@ resource "azurerm_kubernetes_cluster" "main" {
   name                    = var.kubernetes_cluster_name
   location                = var.location
   resource_group_name     = var.resource_group_name
-  private_cluster_enabled = true
+  tags = var.tags
+
+  private_cluster_enabled = false
+  role_based_access_control_enabled = true
+
   dns_prefix              = var.aks_dns
+  oidc_issuer_enabled     = true
 
   identity {
     type         = "UserAssigned"
@@ -24,6 +29,8 @@ resource "azurerm_kubernetes_cluster" "main" {
     network_plugin    = "azure"
     network_policy    = "azure"
     load_balancer_sku = "standard"
+    service_cidr      = "10.2.0.0/24"
+    dns_service_ip    = "10.2.0.10"
   }
 
   monitor_metrics {
