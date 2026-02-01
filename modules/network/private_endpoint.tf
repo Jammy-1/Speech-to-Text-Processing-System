@@ -11,7 +11,7 @@ resource "azurerm_private_endpoint" "speech_pe" {
     name                           = "speech-psc"
     is_manual_connection           = false
     private_connection_resource_id = var.speech_id
-    subresource_names              = ["speech"]
+    subresource_names              = ["account"]
   }
 
   private_dns_zone_group {
