@@ -6,19 +6,31 @@ resource "azurerm_key_vault" "main" {
   tags                = var.tags
 
   enabled_for_disk_encryption = true
-  tenant_id                   = var.tenant_id
-  sku_name                    = "standard"
-  purge_protection_enabled    = true
-  soft_delete_retention_days  = 90
+  rbac_authorization_enabled  = true
+
+  tenant_id                  = var.tenant_id
+  sku_name                   = "standard"
+  purge_protection_enabled   = false
+  soft_delete_retention_days = 7
 }
 
-# Access Control Policy - AKS, Speech, Search
-resource "azurerm_key_vault_access_policy" "aks_speech_search" {
-  key_vault_id = azurerm_key_vault.main.id
-  tenant_id    = var.tenant_id
-  object_id    = var.aks_principal_id
+# UAI - CI/CD - KV Admin
+resource "azurerm_user_assigned_identity" "ci_cd_uai_kv_admin" {
+  name                = var.uai_ci_cd_kv_admin_name
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
 
-  secret_permissions = ["Get"]
+  depends_on = [ azurerm_key_vault.main ]
+}
+
+# RBAC - CI/CD - KV Admin
+resource "azurerm_role_assignment" "rbac_ci_cd_kv_admin" {
+  scope                = azurerm_key_vault.main.id
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = azurerm_user_assigned_identity.ci_cd_uai_kv_admin.principal_id
+
+  depends_on = [ azurerm_user_assigned_identity.ci_cd_uai_kv_admin ]
 }
 
 # Key - ACR Encryption 
@@ -30,6 +42,8 @@ resource "azurerm_key_vault_key" "acr_encryption_key" {
   key_opts     = ["encrypt", "decrypt"]
 
   tags = var.tags
+
+  depends_on = [azurerm_key_vault.main]
 }
 
 # Secret - Speech Key
@@ -39,6 +53,8 @@ resource "azurerm_key_vault_secret" "speech_key" {
   key_vault_id = azurerm_key_vault.main.id
 
   tags = var.tags
+
+  depends_on = [azurerm_key_vault.main]
 }
 
 # Secret - Search Key
@@ -48,6 +64,6 @@ resource "azurerm_key_vault_secret" "search_key" {
   key_vault_id = azurerm_key_vault.main.id
 
   tags = var.tags
+
+  depends_on = [azurerm_key_vault.main]
 }
-
-
