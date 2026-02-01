@@ -8,10 +8,11 @@ resource "azurerm_key_vault" "main" {
   enabled_for_disk_encryption = true
   rbac_authorization_enabled  = true
 
-  tenant_id                  = var.tenant_id
-  sku_name                   = "standard"
-  purge_protection_enabled   = false
-  soft_delete_retention_days = 7
+  tenant_id                = var.tenant_id
+  sku_name                 = "standard"
+  purge_protection_enabled = false
+  /*soft_delete_retention_days = 7*/
+
 }
 
 # UAI - CI/CD - KV Admin
@@ -21,7 +22,7 @@ resource "azurerm_user_assigned_identity" "ci_cd_uai_kv_admin" {
   location            = var.location
   tags                = var.tags
 
-  depends_on = [ azurerm_key_vault.main ]
+  depends_on = [azurerm_key_vault.main]
 }
 
 # RBAC - CI/CD - KV Admin
@@ -30,7 +31,7 @@ resource "azurerm_role_assignment" "rbac_ci_cd_kv_admin" {
   role_definition_name = "Key Vault Administrator"
   principal_id         = azurerm_user_assigned_identity.ci_cd_uai_kv_admin.principal_id
 
-  depends_on = [ azurerm_user_assigned_identity.ci_cd_uai_kv_admin ]
+  depends_on = [azurerm_user_assigned_identity.ci_cd_uai_kv_admin]
 }
 
 # Key - ACR Encryption 
