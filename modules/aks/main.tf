@@ -1,14 +1,14 @@
 resource "azurerm_kubernetes_cluster" "main" {
-  name                    = var.kubernetes_cluster_name
-  location                = var.location
-  resource_group_name     = var.resource_group_name
-  tags = var.tags
+  name                = var.kubernetes_cluster_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  tags                = var.tags
 
-  private_cluster_enabled = false
+  private_cluster_enabled           = false
   role_based_access_control_enabled = true
 
-  dns_prefix              = var.aks_dns
-  oidc_issuer_enabled     = true
+  dns_prefix          = var.aks_dns
+  oidc_issuer_enabled = true
 
   identity {
     type         = "UserAssigned"
