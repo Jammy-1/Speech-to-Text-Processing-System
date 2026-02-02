@@ -5,7 +5,7 @@ resource "azurerm_servicebus_namespace" "service_bus" {
   location            = var.location
   tags                = var.tags
 
-  sku                           = "Premium"
+  sku                           = "Basic"
   capacity                      = 2
   premium_messaging_partitions  = "2"
   public_network_access_enabled = false
