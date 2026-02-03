@@ -9,7 +9,7 @@ module "resource_group" {
 # Storage
 module "storage" {
   source              = "./modules/storage"
-  resource_group_name = var.resource_group_name
+  resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   tags                = var.tags
 
@@ -19,12 +19,15 @@ module "storage" {
 # Key Vault
 module "key-vault" {
   source              = "./modules/key-vault"
-  resource_group_name = var.resource_group_name
+  resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   tags                = var.tags
 
   key_vault_name = var.key_vault_name
   tenant_id      = var.tenant_id
+
+  # UAI
+  uai_ci_cd_kv_admin_name = var.uai_ci_cd_kv_admin_name
 
   # ACR
   acr_encryption_key_name = var.acr_encryption_key_name
@@ -39,14 +42,19 @@ module "key-vault" {
 
   # AKS
   aks_principal_id = module.aks.aks_principal_id
+
+  depends_on = [module.resource_group]
 }
 
 # Network
 module "network" {
   source              = "./modules/network"
-  resource_group_name = var.resource_group_name
+  resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   tags                = var.tags
+
+  # ACR
+  acr_id = module.acr.acr_id
 
   # VNet
   vnet_name = var.vnet_name
@@ -56,36 +64,36 @@ module "network" {
   nsg_name_ingress    = var.nsg_name_ingress
   nsg_name_pe         = var.nsg_name_pe
   nsg_name_queue      = var.nsg_name_queue
-  nsg_name_monitoring = var.nsg_name_queue
+  nsg_name_monitoring = var.nsg_name_monitoring
 
   # Subnt
   subnet_name_aks        = var.subnet_name_aks
   subnet_name_ingress    = var.subnet_name_ingress
   subnet_name_pe         = var.subnet_name_pe
-  subnet_name_queue      = var.subnet_name_pe
-  subnet_name_monitoring = var.subnet_name_pe
-  subnet_name_acr = var.subnet_name_acr
+  subnet_name_queue      = var.subnet_name_queue
+  subnet_name_monitoring = var.subnet_name_monitoring
+  subnet_name_acr        = var.subnet_name_acr
 
   # Storage DNS Link
   storage_dns_link_name = var.storage_dns_link_name
   speech_dns_link_name  = var.speech_dns_link_name
   search_dns_link_name  = var.search_dns_link_name
   queue_dns_link_name   = var.queue_dns_link_name
-  acr_dns_link_name = var.acr_dns_link_name
+  acr_dns_link_name     = var.acr_dns_link_name
 
   # Storage DNS Group
   storage_dns_group_name = var.storage_dns_group_name
   speech_dns_group_name  = var.speech_dns_group_name
   search_dns_group_name  = var.search_dns_group_name
   queue_dns_group_name   = var.queue_dns_group_name
-  acr_dns_group_name = var.acr_dns_group_name
+  acr_dns_group_name     = var.acr_dns_group_name
 
   # Private Endpoint
   private_endpoint_name_storage_pe = var.private_endpoint_name_storage_pe
   private_endpoint_name_speech_pe  = var.private_endpoint_name_speech_pe
   private_endpoint_name_search_pe  = var.private_endpoint_name_search_pe
   private_endpoint_name_queue_pe   = var.private_endpoint_name_queue_pe
-  private_endpoint_name_acr_pe = var.private_endpoint_name_acr_pe
+  private_endpoint_name_acr_pe     = var.private_endpoint_name_acr_pe
 
   # Application Gateway 
   app_gw_name                     = var.app_gw_name
@@ -106,14 +114,16 @@ module "network" {
 
   # ID's
   speech_id      = module.cognitive.speech_id
-  search_id      = module.cognitive.speech_id
+  search_id      = module.cognitive.search_id
   service_bus_id = module.queue.service_bus_id
+
+  depends_on = [module.resource_group]
 }
 
 # ACR
 module "acr" {
   source              = "./modules/acr"
-  resource_group_name = var.resource_group_name
+  resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   tags                = var.tags
 
@@ -121,18 +131,17 @@ module "acr" {
   uai_acr_name = var.acr_name
 
   # Access
-  key_vault_id            = module.key-vault.acr_encryption_key_id
+  acr_encryption_key_id   = module.key-vault.acr_encryption_key_id
   acr_encryption_key_name = var.acr_encryption_key_name
-  acr_id                  = module.acr.acr_id
   aks_uai_principal_id    = module.aks.aks_principal_id
-  uai_ci_cd_name          = var.uai_ci_cd_name
+  uai_ci_cd_acr_name      = var.uai_ci_cd_acr_name
 
 }
 
 # K8
 module "k8" {
   source                = "./modules/kubernetes"
-  resource_group_name = var.resource_group_name
+  resource_group_name   = module.resource_group.resource_group_name
   location              = var.location
   k8_environment        = var.k8_environment
   k8_label_project_name = var.k8_label_project_name
@@ -181,10 +190,11 @@ module "k8" {
   tags = var.tags
 }
 
+
 # AKS
 module "aks" {
   source              = "./modules/aks"
-  resource_group_name = var.resource_group_name
+  resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   tags                = var.tags
 
@@ -205,14 +215,14 @@ module "aks" {
 
   # Access
   key_vault_id               = module.key-vault.key_vault_id
-  rbac_aks_speech_key_access = module.key-vault.speech_secret_id
-  rbac_aks_search_key_access = module.key-vault.search_secret_id
+  rbac_aks_speech_key_access = module.key-vault.key_vault_id
+  rbac_aks_search_key_access = module.key-vault.key_vault_id
 }
 
 # Cognitive
 module "cognitive" {
   source              = "./modules/cognitive"
-  resource_group_name = var.resource_group_name
+  resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   tags                = var.tags
 
@@ -223,12 +233,14 @@ module "cognitive" {
   key_vault_id               = module.key-vault.key_vault_id
   uai_name_search_service    = var.uai_name_search_service
   uai_name_cognitive_account = var.uai_name_cognitive_account
+
+  depends_on = [module.resource_group]
 }
 
 # Queue
 module "queue" {
   source              = "./modules/queue"
-  resource_group_name = var.resource_group_name
+  resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   tags                = var.tags
 
@@ -241,5 +253,6 @@ module "queue" {
   service_bus_name     = var.service_bus
   aks_uai_principal_id = module.aks.aks_principal_id
 
+  depends_on = [module.resource_group]
 }
 
