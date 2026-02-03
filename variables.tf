@@ -1,8 +1,6 @@
-# Resource Group
+# General
 variable "resource_group_name" { type = string }
 variable "location" { type = string }
-
-# Tags 
 variable "tags" { type = map(string) }
 
 # Cognitive
@@ -21,7 +19,7 @@ variable "storage_queue" { type = string }
 # ACR
 variable "acr_name" {}
 variable "uai_acr_name" { type = string }
-variable "uai_ci_cd_name" { type = string }
+variable "uai_ci_cd_acr_name" { type = string }
 
 # AKS
 variable "kubernetes_cluster_name" { type = string }
@@ -38,11 +36,6 @@ variable "uai_aks_name" { type = string }
 # K8
 variable "k8_environment" { type = string }
 variable "k8_label_project_name" { type = string }
-variable "service_bus_namespace" { type = string }
-variable "speech_key" {
-  type      = string
-  sensitive = true
-}
 
 # K8 - Config Map 
 variable "search_index_name" { type = string }
@@ -63,6 +56,7 @@ variable "storage_account_name" { type = string }
 # Key Vault
 variable "key_vault_name" { type = string }
 variable "tenant_id" { type = string }
+variable "uai_ci_cd_kv_admin_name" { type = string }
 
 variable "acr_encryption_key_name" { type = string }
 
@@ -123,29 +117,41 @@ variable "nsg_name_monitoring" { type = string }
 # NSG Rules - AKS
 variable "security_rules_aks" {
   type = list(object({
-    name                       = string
-    priority                   = number
-    direction                  = string
-    access                     = string
-    protocol                   = string
-    source_port_range          = optional(string)
-    destination_port_range     = optional(string)
-    source_address_prefix      = optional(string)
-    destination_address_prefix = optional(string)
+    name                                       = string
+    priority                                   = number
+    direction                                  = string
+    access                                     = string
+    protocol                                   = string
+    source_port_range                          = optional(string)
+    source_port_ranges                         = optional(list(string))
+    destination_port_range                     = optional(string)
+    destination_port_ranges                    = optional(list(string))
+    source_address_prefix                      = optional(string)
+    source_address_prefixes                    = optional(list(string))
+    source_application_security_group_ids      = optional(list(string))
+    destination_address_prefix                 = optional(string)
+    destination_address_prefixes               = optional(list(string))
+    destination_application_security_group_ids = optional(list(string))
   }))
 }
 
 # NSG Rules - Ingress 
 variable "security_rules_ingress" {
   type = list(object({
-    name                       = string
-    priority                   = number
-    direction                  = string
-    access                     = string
-    protocol                   = string
-    source_port_range          = optional(string)
-    destination_port_range     = optional(string)
-    source_address_prefix      = optional(string)
-    destination_address_prefix = optional(string)
+    name                                       = string
+    priority                                   = number
+    direction                                  = string
+    access                                     = string
+    protocol                                   = string
+    source_port_range                          = optional(string)
+    source_port_ranges                         = optional(list(string))
+    destination_port_range                     = optional(string)
+    destination_port_ranges                    = optional(list(string))
+    source_address_prefix                      = optional(string)
+    source_address_prefixes                    = optional(list(string))
+    source_application_security_group_ids      = optional(list(string))
+    destination_address_prefix                 = optional(string)
+    destination_address_prefixes               = optional(list(string))
+    destination_application_security_group_ids = optional(list(string))
   }))
 }
