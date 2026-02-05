@@ -12,7 +12,7 @@ output "speech_endpoint" {
 
 # Search
 output "search_name" { value = azurerm_search_service.search_service.name }
-output "transcripts_index_name" { value = azapi_resource.transcripts_index.name }
+output "transcripts_index_name" { value = azapi_data_plane_resource.transcripts_index.name }
 output "search_id" {
   value     = azurerm_search_service.search_service.id
   sensitive = true

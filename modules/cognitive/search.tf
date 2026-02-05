@@ -28,10 +28,11 @@ resource "azurerm_search_service" "search_service" {
   authentication_failure_mode   = "http403"
 }
 
+
 # Search Index
-resource "azapi_data_plane_resource" "example" {
+resource "azapi_data_plane_resource" "transcripts_index" {
   type      = "Microsoft.Search/searchServices/indexes@2024-07-01"
-  parent_id = "${azurerm_search_service.name}.search.windows.net"
+  parent_id = "${azurerm_search_service.search_service}.search.windows.net"
   name      = "transcripts-index"
   body = {
     fields = [
