@@ -1,11 +1,12 @@
 # Namespace - Search 
 resource "kubernetes_namespace_v1" "search" {
   metadata {
+    name = "search-stt"
     labels = {
-      "app.kubernetes.io/name"        = var.k8_label_project_name
+      "app.kubernetes.io/name"        = "search-stt"
       "app.kubernetes.io/environment" = var.k8_environment
-      "app.kubernetes.io/component"   = "search"
-      "app.kubernetes.io/part-of"     = "search-processing"
+      "app.kubernetes.io/component"   = "stt-search"
+      "app.kubernetes.io/part-of"     = var.k8_label_project_name
       "app.kubernetes.io/managed-by"  = "engineering"
     }
   }
@@ -52,6 +53,7 @@ resource "kubernetes_deployment_v1" "search_worker" {
         container {
           name  = "search-worker"
           image = var.search_worker_image
+          image_pull_policy = "Always"
 
           resources {
             requests = {
