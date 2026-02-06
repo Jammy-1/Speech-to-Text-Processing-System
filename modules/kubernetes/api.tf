@@ -1,11 +1,11 @@
 # Namespace - API
 resource "kubernetes_namespace_v1" "api" {
   metadata {
-    name = "api"
+    name = "api-stt"
     labels = {
-      "app.kubernetes.io/name"       = "stt-processing"
+      "app.kubernetes.io/name"       = "api-stt"
       "app.kubernetes.io/component"  = "api"
-      "app.kubernetes.io/part-of"    = "speech-platform"
+      "app.kubernetes.io/part-of"    = var.k8_label_project_name
       "app.kubernetes.io/managed-by" = "engineering"
     }
   }
@@ -45,6 +45,11 @@ resource "azurerm_federated_identity_credential" "api_fic" {
   issuer              = var.aks_oidc
   subject             = "system:serviceaccount:api:api-sa"
   audience            = ["api://AzureADTokenExchange"]
+
+  depends_on = [
+    azurerm_user_assigned_identity.api_uai,
+    kubernetes_service_account_v1.api_sa
+  ]
 }
 
 # Configuration Map - Internal API
