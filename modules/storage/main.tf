@@ -9,7 +9,7 @@ resource "azurerm_storage_account" "main" {
   account_replication_type = "GRS"
   min_tls_version          = "TLS1_2"
 
-  public_network_access_enabled = false
+  public_network_access_enabled = true
 
   network_rules {
     default_action             = "Deny"
