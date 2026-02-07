@@ -9,6 +9,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   local_account_disabled            = true
   azure_policy_enabled              = true
   automatic_upgrade_channel         = "stable"
+  disk_encryption_set_id            = var.disk_encryption_set_id
 
   dns_prefix          = var.aks_dns
   oidc_issuer_enabled = true
