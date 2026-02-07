@@ -1,12 +1,12 @@
 # Namespace - Storage 
 resource "kubernetes_namespace_v1" "storage" {
   metadata {
-    name = "storage-worker"
+    name = "storage-stt"
     labels = {
-      "app.kubernetes.io/name"        = "storage-worker"
+      "app.kubernetes.io/name"        = "storage-stt"
       "app.kubernetes.io/environment" = var.k8_environment
       "app.kubernetes.io/component"   = "speech"
-      "app.kubernetes.io/part-of"     = "speech-platform"
+      "app.kubernetes.io/part-of"     = var.k8_label_project_name
       "app.kubernetes.io/managed-by"  = "engineering"
     }
   }
@@ -49,8 +49,9 @@ resource "kubernetes_deployment_v1" "storage_worker" {
 
       spec {
         container {
-          name  = "storage-worker"
-          image = var.storage_worker_image
+          name              = "storage-worker"
+          image             = var.storage_worker_image
+          image_pull_policy = "Always"
 
           resources {
             requests = {
