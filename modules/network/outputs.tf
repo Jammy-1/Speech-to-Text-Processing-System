@@ -5,6 +5,7 @@ output "vnet_name" { value = azurerm_virtual_network.main.name }
 # Subnet
 output "aks_subnet_id" { value = azurerm_subnet.aks.id }
 output "ingress_subnet_id" { value = azurerm_subnet.ingress.id }
+output "pe_subnet_id" { value = azurerm_subnet.pe.id }
 
 output "aks_subnet_name" { value = azurerm_subnet.aks.name }
 output "acr_subnet_name" { value = azurerm_subnet.acr.name }
