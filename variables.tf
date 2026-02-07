@@ -15,6 +15,7 @@ variable "service_bus" { type = string }
 variable "speech_queue" { type = string }
 variable "search_queue" { type = string }
 variable "storage_queue" { type = string }
+variable "service_bus_encryption_key_name" { type = string }
 
 # Storage 
 variable "storage_account_name" { type = string }
@@ -32,6 +33,8 @@ variable "uai_ci_cd_acr_name" { type = string }
 variable "kubernetes_cluster_name" { type = string }
 variable "aks_dns" { type = string }
 variable "aks_node_pool_name" { type = string }
+
+variable "aks_disk_encryption_key_name" { type = string }
 
 variable "aks_node_scaling_min" { type = number }
 variable "aks_node_scaling_max" { type = number }

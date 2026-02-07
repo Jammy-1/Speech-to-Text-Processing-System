@@ -41,6 +41,9 @@ module "key-vault" {
   key_vault_name = var.key_vault_name
   tenant_id      = var.tenant_id
 
+  # ServiceBus
+  servicebus_encryption_key_name = var.service_bus_encryption_key_name
+
   #Network
   pe_subnet_id = module.network.pe_subnet_id
 
@@ -59,7 +62,8 @@ module "key-vault" {
   search_primary_key = module.cognitive.search_primary_key
 
   # AKS
-  aks_principal_id = module.aks.aks_principal_id
+  aks_principal_id             = module.aks.aks_principal_id
+  aks_disk_encryption_key_name = var.acr_encryption_key_name
 
   depends_on = [module.resource_group]
 }
@@ -224,13 +228,14 @@ module "aks" {
   aks_subnet_id = module.network.aks_subnet_id
 
   # AKS Parameters
-  aks_node_pool_name    = var.aks_node_pool_name
-  aks_node_scaling_min  = var.aks_node_scaling_min
-  aks_node_scaling_max  = var.aks_node_scaling_max
-  aks_node_size         = var.aks_node_size
-  aks_node_os_disk_size = var.aks_node_os_disk_size
-  log_workspace_id      = module.log-analytics.log_analytics_workspace_id
-  acr_id                = module.acr.acr_id
+  aks_node_pool_name     = var.aks_node_pool_name
+  aks_node_scaling_min   = var.aks_node_scaling_min
+  aks_node_scaling_max   = var.aks_node_scaling_max
+  aks_node_size          = var.aks_node_size
+  aks_node_os_disk_size  = var.aks_node_os_disk_size
+  log_workspace_id       = module.log-analytics.log_analytics_workspace_id
+  disk_encryption_set_id = module.key-vault.aks_disk_encryption_key_id
+  acr_id                 = module.acr.acr_id
 
   # Access
   key_vault_id               = module.key-vault.key_vault_id
@@ -266,13 +271,18 @@ module "queue" {
   location            = var.location
   tags                = var.tags
 
+  key_vault_id = module.key-vault.key_vault_id
+
   # Names
   speech_queue_name  = var.speech_queue
   search_queue_name  = var.search_queue
   storage_queue_name = var.storage_queue
 
-  # Access
-  service_bus_name     = var.service_bus
+  # Service Bus 
+  service_bus_name              = var.service_bus
+  service_bus_encryption_key_id = module.key-vault.service_bus_encryption_key_id
+
+  # AKS
   aks_uai_principal_id = module.aks.aks_principal_id
 
   depends_on = [module.resource_group]
