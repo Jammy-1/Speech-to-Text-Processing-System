@@ -5,12 +5,16 @@ resource "azurerm_container_registry" "main" {
   location            = var.location
   tags                = var.tags
 
-  sku = "Premium"
-  georeplications { location = "ukwest" }
-
+  sku                           = "Premium"
   admin_enabled                 = false
-  public_network_access_enabled = false
-  network_rule_bypass_option    = "AzureServices"
+  public_network_access_enabled = true
+
+  retention_policy_in_days  = 30
+  quarantine_policy_enabled = true
+  trust_policy_enabled      = true
+
+
+  network_rule_bypass_option = "AzureServices"
   network_rule_set { default_action = "Deny" }
 
   identity {
@@ -21,6 +25,12 @@ resource "azurerm_container_registry" "main" {
   encryption {
     key_vault_key_id   = var.acr_encryption_key_id
     identity_client_id = azurerm_user_assigned_identity.acr_uai.client_id
+  }
+
+  georeplications {
+    location                = "ukwest"
+    zone_redundancy_enabled = true
+    tags                    = var.tags
   }
 }
 
