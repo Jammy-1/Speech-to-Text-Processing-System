@@ -6,9 +6,9 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   private_cluster_enabled           = false
   role_based_access_control_enabled = true
-  local_account_disabled = true
-  azure_policy_enabled = true
-  automatic_upgrade_channel = "stable"
+  local_account_disabled            = true
+  azure_policy_enabled              = true
+  automatic_upgrade_channel         = "stable"
 
   dns_prefix          = var.aks_dns
   oidc_issuer_enabled = true
@@ -19,17 +19,17 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   default_node_pool {
-    name           = var.aks_node_pool_name
+    name = var.aks_node_pool_name
 
-    auto_scaling_enabled = true
+    auto_scaling_enabled    = true
     host_encryption_enabled = true
 
-    min_count            = var.aks_node_scaling_min
-    max_count            = var.aks_node_scaling_max
-    vm_size        = var.aks_node_size
-    os_disk_type = "Ephemeral"
-    os_disk_size_gb = var.aks_node_os_disk_size   
-    
+    min_count       = var.aks_node_scaling_min
+    max_count       = var.aks_node_scaling_max
+    vm_size         = var.aks_node_size
+    os_disk_type    = "Ephemeral"
+    os_disk_size_gb = var.aks_node_os_disk_size
+
     vnet_subnet_id = var.aks_subnet_id
   }
 
@@ -46,8 +46,12 @@ resource "azurerm_kubernetes_cluster" "main" {
     labels_allowed      = null
   }
 
-  oms_agent { log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id }
+  key_vault_secrets_provider {
+    secret_rotation_enabled  = true
+    secret_rotation_interval = "2m"
+  }
 
+  oms_agent { log_analytics_workspace_id = var.log_workspace_id }
 }
 
 # UAI- AKS
@@ -70,12 +74,4 @@ resource "azurerm_role_assignment" "rbac_aks_search_key_access" {
   scope                = var.rbac_aks_search_key_access
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_user_assigned_identity.aks_uai.principal_id
-}
-
-resource "azurerm_log_analytics_workspace" "main" {
-  name                = var.aks_log_workspace_name
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  sku                 = "PerGB2018"
-  tags                = var.tags
 }

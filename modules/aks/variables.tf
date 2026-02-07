@@ -15,7 +15,8 @@ variable "aks_node_scaling_max" { type = number }
 variable "aks_node_size" { type = string }
 variable "aks_node_os_disk_size" { type = string }
 
-variable "aks_log_workspace_name" { type = string }
+# Log Workspace
+variable "log_workspace_id" { type = string }
 
 # UAI
 variable "uai_aks_name" { type = string }
