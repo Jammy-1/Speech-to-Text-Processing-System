@@ -19,20 +19,25 @@ resource "azurerm_search_service" "search_service" {
   location            = var.location
   tags                = var.tags
 
-  sku             = "basic"
+  sku             = "standard"
   replica_count   = 1
   partition_count = 1
 
   public_network_access_enabled = true
   local_authentication_enabled  = true
   authentication_failure_mode   = "http403"
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.search_service_uai.id]
+  }
 }
 
 
 # Search Index
 resource "azapi_data_plane_resource" "transcripts_index" {
   type      = "Microsoft.Search/searchServices/indexes@2024-07-01"
-  parent_id = "${azurerm_search_service.search_service}.search.windows.net"
+  parent_id = "${azurerm_search_service.search_service.id}.search.windows.net"
   name      = "transcripts-index"
   body = {
     fields = [
