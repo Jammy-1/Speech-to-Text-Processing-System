@@ -28,10 +28,10 @@ resource "azurerm_container_registry" "main" {
   }
 
   georeplications {
-    location                = "ukwest"
-    tags                    = var.tags
+    location = "ukwest"
+    tags     = var.tags
   }
-  
+
   zone_redundancy_enabled = true
 }
 
