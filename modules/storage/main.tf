@@ -13,6 +13,7 @@ resource "azurerm_storage_account" "main" {
 
   network_rules {
     default_action             = "Deny"
+    bypass                     = ["Logging", "Metrics", "AzureServices"]
     virtual_network_subnet_ids = [var.pe_subnet_id]
   }
 }
@@ -32,9 +33,9 @@ resource "azurerm_storage_container" "transcripts" {
 }
 
 # Monitoring
-resource "azurerm_monitor_aad_diagnostic_setting" "storage_logs" {
+resource "azurerm_monitor_diagnostic_setting" "storage_logs" {
   name                       = var.storage_log_name
-  storage_account_id         = azurerm_storage_account.main
+  target_resource_id         = azurerm_storage_account.main.id
   log_analytics_workspace_id = var.log_workspace_id
 
   enabled_log { category = "StorageRead" }
