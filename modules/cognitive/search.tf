@@ -20,7 +20,7 @@ resource "azurerm_search_service" "search_service" {
   tags                = var.tags
 
   sku             = "standard"
-  replica_count   = 1
+  replica_count   = 3
   partition_count = 1
 
   public_network_access_enabled = true
