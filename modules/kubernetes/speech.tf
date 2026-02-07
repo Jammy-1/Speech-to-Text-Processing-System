@@ -1,15 +1,17 @@
 # Namespace - Speech
 resource "kubernetes_namespace_v1" "speech" {
   metadata {
-   labels = {
-      "app.kubernetes.io/name"       = "stt-processing"
+    name = "speech-stt"
+    labels = {
+      "app.kubernetes.io/name"        = "speech-stt"
       "app.kubernetes.io/environment" = var.k8_environment
-      "app.kubernetes.io/component"  = "speech"
-      "app.kubernetes.io/part-of"    = "speech-platform"
-      "app.kubernetes.io/managed-by" = "engineering"
+      "app.kubernetes.io/component"   = "speech"
+      "app.kubernetes.io/part-of"     = var.k8_label_project_name
+      "app.kubernetes.io/managed-by"  = "engineering"
     }
   }
 }
+
 
 # Configuration Map - Speech
 resource "kubernetes_config_map_v1" "speech_config_map" {
@@ -63,8 +65,9 @@ resource "kubernetes_deployment_v1" "speech_worker" {
 
       spec {
         container {
-          name  = "speech-worker"
-          image = var.speech_worker_image
+          name              = "speech-worker"
+          image             = var.speech_worker_image
+          image_pull_policy = "Always"
 
           resources {
             requests = {
