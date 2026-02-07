@@ -11,10 +11,18 @@ resource "azurerm_cognitive_account" "speech_service" {
   custom_subdomain_name              = "stt-speech-001"
   outbound_network_access_restricted = "true"
   public_network_access_enabled      = "false"
+  local_auth_enabled                 = "false"
 
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.cognitive_account_uai.id]
+  }
+
+  network_acls {
+    default_action = "Deny"
+    virtual_network_rules {
+      subnet_id = var.pe_subnet_id
+    }
   }
 }
 

@@ -13,3 +13,7 @@ variable "uai_name_search_service" { type = string }
 
 # Key Vault
 variable "key_vault_id" { type = string }
+
+# Subnet 
+variable "pe_subnet_id" { type = string }
+
