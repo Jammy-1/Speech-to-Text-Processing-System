@@ -18,11 +18,11 @@ jobs:
       - name: Determine Environment Based On Branch
         id: detect-env
         run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-                BRANCH="${{ github.base_ref }}"
-              else
-                BRANCH="${{ github.ref_name }}"
-              fi
+          if [ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]; then
+             BRANCH="${GITHUB_REF#refs/heads/}"
+           else
+             BRANCH="${{ github.event.workflow_run.head_branch }}"
+           fi
 
           case "$BRANCH" in
             dev) ENV="dev" ;;
@@ -62,7 +62,7 @@ jobs:
 
       # List Modules
       - name: List Module Folders
-        run: ls -l Modules/
+        run: ls -l modules/
 
       # Terraform
       - name: Setup Terraform
