@@ -5,7 +5,7 @@ resource "azurerm_container_registry" "main" {
   location            = var.location
   tags                = var.tags
 
-  sku                           = "Premium"
+  sku = "Premium"
   georeplications { location = "ukwest" }
 
   admin_enabled                 = false
