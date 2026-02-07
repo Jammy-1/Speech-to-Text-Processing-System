@@ -5,14 +5,21 @@ resource "azurerm_servicebus_namespace" "service_bus" {
   location            = var.location
   tags                = var.tags
 
-  sku      = "Basic"
+  sku      = "Premium"
   capacity = 2
 
   premium_messaging_partitions = "2"
 
-  public_network_access_enabled = false
+  public_network_access_enabled = true
   local_auth_enabled            = false
   minimum_tls_version           = "1.2"
+
+  customer_managed_key {
+    key_vault_key_id = var.key_vault_id
+    identity_id      = var.service_bus_encryption_key_id
+  }
+
+  identity { type = "SystemAssigned" }
 }
 
 # Queue - Speech

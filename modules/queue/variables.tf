@@ -6,6 +6,10 @@ variable "tags" { type = map(string) }
 # Service Bus
 variable "service_bus_name" { type = string }
 
+# Key Vault & Encryption Key
+variable "key_vault_id" { type = string }
+variable "service_bus_encryption_key_id" { type = string }
+
 # AKS
 variable "aks_uai_principal_id" { type = string }
 
