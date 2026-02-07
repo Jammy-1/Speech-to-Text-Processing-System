@@ -16,6 +16,13 @@ variable "speech_queue" { type = string }
 variable "search_queue" { type = string }
 variable "storage_queue" { type = string }
 
+# Storage 
+variable "storage_account_name" { type = string }
+variable "storage_log_name" { type = string }
+
+# Log Analytics
+variable "log_workspace_name" { type = string }
+
 # ACR
 variable "acr_name" {}
 variable "uai_acr_name" { type = string }
@@ -28,9 +35,9 @@ variable "aks_node_pool_name" { type = string }
 
 variable "aks_node_scaling_min" { type = number }
 variable "aks_node_scaling_max" { type = number }
+variable "aks_node_os_disk_size" { type = string }
 
 variable "aks_node_size" { type = string }
-variable "aks_log_workspace_name" { type = string }
 variable "uai_aks_name" { type = string }
 
 # K8
@@ -49,9 +56,6 @@ variable "storage_worker_image" { type = string }
 
 # K8 - API 
 variable "uai_name_api" { type = string }
-
-# Storage 
-variable "storage_account_name" { type = string }
 
 # Key Vault
 variable "key_vault_name" { type = string }

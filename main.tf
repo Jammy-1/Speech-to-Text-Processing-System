@@ -14,8 +14,23 @@ module "storage" {
   tags                = var.tags
 
   storage_account_name = var.storage_account_name
+
+  # Logs
+  log_workspace_id = module.log-analytics.log_analytics_workspace_id
+  storage_log_name = var.storage_log_name
+
+  # Network
+  pe_subnet_id = module.network.pe_subnet_id
 }
 
+module "log-analytics" {
+  source              = "./modules/log-analytics"
+  resource_group_name = module.resource_group.resource_group_name
+  location            = var.location
+  tags                = var.tags
+
+  log_workspace_name = var.log_workspace_name
+}
 # Key Vault
 module "key-vault" {
   source              = "./modules/key-vault"
@@ -25,6 +40,9 @@ module "key-vault" {
 
   key_vault_name = var.key_vault_name
   tenant_id      = var.tenant_id
+
+  #Network
+  pe_subnet_id = module.network.pe_subnet_id
 
   # UAI
   uai_ci_cd_kv_admin_name = var.uai_ci_cd_kv_admin_name
@@ -206,12 +224,13 @@ module "aks" {
   aks_subnet_id = module.network.aks_subnet_id
 
   # AKS Parameters
-  aks_node_pool_name     = var.aks_node_pool_name
-  aks_node_scaling_min   = var.aks_node_scaling_min
-  aks_node_scaling_max   = var.aks_node_scaling_max
-  aks_node_size          = var.aks_node_size
-  aks_log_workspace_name = var.aks_log_workspace_name
-  acr_id                 = module.acr.acr_id
+  aks_node_pool_name    = var.aks_node_pool_name
+  aks_node_scaling_min  = var.aks_node_scaling_min
+  aks_node_scaling_max  = var.aks_node_scaling_max
+  aks_node_size         = var.aks_node_size
+  aks_node_os_disk_size = var.aks_node_os_disk_size
+  log_workspace_id      = module.log-analytics.log_analytics_workspace_id
+  acr_id                = module.acr.acr_id
 
   # Access
   key_vault_id               = module.key-vault.key_vault_id
@@ -228,6 +247,9 @@ module "cognitive" {
 
   cognitive_account_name = var.cognitive_account_name
   search_service_name    = var.search_service_name
+
+  # Subnet 
+  pe_subnet_id = module.network.pe_subnet_id
 
   # Access
   key_vault_id               = module.key-vault.key_vault_id
