@@ -14,8 +14,12 @@ variable "pe_subnet_id" { type = string }
 # ACR
 variable "acr_encryption_key_name" { type = string }
 
+# Service Bus
+variable "servicebus_encryption_key_name" { type = string }
+
 # AKS
 variable "aks_principal_id" { type = string }
+variable "aks_disk_encryption_key_name" { type = string }
 
 # Speech Key 
 variable "speech_key_name" { type = string }

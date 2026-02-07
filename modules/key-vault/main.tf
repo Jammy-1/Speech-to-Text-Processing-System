@@ -11,7 +11,7 @@ resource "azurerm_key_vault" "main" {
   tenant_id                  = var.tenant_id
   sku_name                   = "standard"
   purge_protection_enabled   = false
-  soft_delete_retention_days = 7
+  soft_delete_retention_days = 90
 
   network_acls {
     default_action             = "Deny"
@@ -43,7 +43,35 @@ resource "azurerm_role_assignment" "rbac_ci_cd_kv_admin" {
 resource "azurerm_key_vault_key" "acr_encryption_key" {
   name            = var.acr_encryption_key_name
   key_vault_id    = azurerm_key_vault.main.id
-  key_type        = "RSA"
+  key_type        = "RSA-HSM"
+  key_size        = 2048
+  key_opts        = ["encrypt", "decrypt"]
+  expiration_date = timeadd(timestamp(), "4380h")
+
+  tags = var.tags
+
+  depends_on = [azurerm_key_vault.main]
+}
+
+# Key - AKS Encryption 
+resource "azurerm_key_vault_key" "aks_encryption_key" {
+  name            = var.aks_disk_encryption_key_name
+  key_vault_id    = azurerm_key_vault.main.id
+  key_type        = "RSA-HSM"
+  key_size        = 2048
+  key_opts        = ["encrypt", "decrypt"]
+  expiration_date = timeadd(timestamp(), "4380h")
+
+  tags = var.tags
+
+  depends_on = [azurerm_key_vault.main]
+}
+
+# Key - Service Bus Encryption 
+resource "azurerm_key_vault_key" "service_bus_encryption_key" {
+  name            = var.servicebus_encryption_key_name
+  key_vault_id    = azurerm_key_vault.main.id
+  key_type        = "RSA-HSM"
   key_size        = 2048
   key_opts        = ["encrypt", "decrypt"]
   expiration_date = timeadd(timestamp(), "4380h")
