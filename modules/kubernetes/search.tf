@@ -51,8 +51,8 @@ resource "kubernetes_deployment_v1" "search_worker" {
 
       spec {
         container {
-          name  = "search-worker"
-          image = var.search_worker_image
+          name              = "search-worker"
+          image             = var.search_worker_image
           image_pull_policy = "Always"
 
           resources {
