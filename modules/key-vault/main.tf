@@ -8,11 +8,16 @@ resource "azurerm_key_vault" "main" {
   enabled_for_disk_encryption = true
   rbac_authorization_enabled  = true
 
-  tenant_id                = var.tenant_id
-  sku_name                 = "standard"
-  purge_protection_enabled = false
-  /*soft_delete_retention_days = 7*/
+  tenant_id                  = var.tenant_id
+  sku_name                   = "standard"
+  purge_protection_enabled   = false
+  soft_delete_retention_days = 7
 
+  network_acls {
+    default_action             = "Deny"
+    bypass                     = "AzureServices"
+    virtual_network_subnet_ids = [var.pe_subnet_id]
+  }
 }
 
 # UAI - CI/CD - KV Admin
@@ -36,11 +41,12 @@ resource "azurerm_role_assignment" "rbac_ci_cd_kv_admin" {
 
 # Key - ACR Encryption 
 resource "azurerm_key_vault_key" "acr_encryption_key" {
-  name         = var.acr_encryption_key_name
-  key_vault_id = azurerm_key_vault.main.id
-  key_type     = "RSA"
-  key_size     = 2048
-  key_opts     = ["encrypt", "decrypt"]
+  name            = var.acr_encryption_key_name
+  key_vault_id    = azurerm_key_vault.main.id
+  key_type        = "RSA"
+  key_size        = 2048
+  key_opts        = ["encrypt", "decrypt"]
+  expiration_date = timeadd(timestamp(), "4380h")
 
   tags = var.tags
 
@@ -53,6 +59,9 @@ resource "azurerm_key_vault_secret" "speech_key" {
   value        = var.speech_primary_key
   key_vault_id = azurerm_key_vault.main.id
 
+  content_type    = "text/plain"
+  expiration_date = timeadd(timestamp(), "4380h")
+
   tags = var.tags
 
   depends_on = [azurerm_key_vault.main]
@@ -63,6 +72,9 @@ resource "azurerm_key_vault_secret" "search_key" {
   name         = var.search_key_name
   value        = var.search_primary_key
   key_vault_id = azurerm_key_vault.main.id
+
+  content_type    = "text/plain"
+  expiration_date = timeadd(timestamp(), "4380h")
 
   tags = var.tags
 
