@@ -29,9 +29,10 @@ resource "azurerm_container_registry" "main" {
 
   georeplications {
     location                = "ukwest"
-    zone_redundancy_enabled = true
     tags                    = var.tags
   }
+  
+  zone_redundancy_enabled = true
 }
 
 # UAI - ACR
