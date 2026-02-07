@@ -13,6 +13,7 @@ variable "aks_node_pool_name" { type = string }
 variable "aks_node_scaling_min" { type = number }
 variable "aks_node_scaling_max" { type = number }
 variable "aks_node_size" { type = string }
+variable "aks_node_os_disk_size" { type = string }
 
 variable "aks_log_workspace_name" { type = string }
 
