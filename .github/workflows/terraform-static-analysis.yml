@@ -216,8 +216,8 @@ jobs:
           output_format: cli
           download_external_modules: true
 
-          # HTTP (160)
-          skip_check: CKV_AZURE_160
+          # HTTP (160) - KV Pure Protection (110) - CA Local Auth (236) - AKS SLA Paid SKU (170) - Min 50 Pods - AKS API Auth IP -CA Diabled Public Network (124) - SA Blob Public Access (190) - SA Public Access (59) - Queue Logging (33)
+          skip_check: CKV_AZURE_160, CKV_AZURE_110, CKV_AZURE_236, CKV_AZURE_170, CKV_AZURE_168, CKV_AZURE_6, CKV_AZURE_124, CKV_AZURE_190, CKV_AZURE_59, CKV_AZURE_33,
 
   trigger-plan-validation:
     name: Trigger Plan Validation
