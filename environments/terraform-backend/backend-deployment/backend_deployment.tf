@@ -18,12 +18,12 @@ resource "azurerm_storage_account" "stt_state_storage_account" {
   account_replication_type = "LRS"
 
   public_network_access_enabled = "true"
-  https_traffic_only_enabled = true
-  min_tls_version = "TLS1_2"
+  https_traffic_only_enabled    = true
+  min_tls_version               = "TLS1_2"
 
   blob_properties {
     delete_retention_policy { days = 30 }
-      versioning_enabled = true
+    versioning_enabled = true
   }
 
   depends_on = [azurerm_resource_group.stt_state_resource_group]
