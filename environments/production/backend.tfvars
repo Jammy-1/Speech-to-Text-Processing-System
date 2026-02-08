@@ -1,23 +1,18 @@
 # General
-resource_group_name = "Speech-to-Text-Processing-System-Production"
-location            = "uksouth"
+state_resource_group_name = "Speech-to-Text-Processing-System-Production-Backend"
+location                  = "uksouth"
 
-# Storage                 
-storage_account_name   = "sttprocessingprod"
-storage_container_name = "statecontainerprod"
-state_key_backend      = "backend/terraform.tfstate"
-state_key_deployment   = "production/terraform.tfstate"
-
-# Event Hub 
-eventhub_namespace      = "speech-to-text-processing-system-production"
-eventhub_name           = "speech-to-text-processing-system-production"
-eventhub_auth_rule_name = "event-auth-rule-production"
+# Storage                       
+state_storage_account_name   = "prodbackendstt"
+state_storage_container_name = "prod-state-container-bakend"
+state_key_backend            = "backend/terraform.tfstate"
+state_key_deployment         = "production/terraform.tfstate"
 
 # Environment Tags
-env_tags = {
+tags = {
   environment = "production-backend"
   project     = "production-Speech-to-Text-Processing-System"
-  owner       = "production-backend-team"
+  owner       = "development-team"
   cost_center = "production-Speech-to-Text-Processing-System"
 }
 

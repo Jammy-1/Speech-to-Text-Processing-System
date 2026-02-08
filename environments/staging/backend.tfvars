@@ -1,24 +1,19 @@
 # General
-resource_group_name = "Speech-to-Text-Processing-System-Staging"
-location            = "uksouth"
+state_resource_group_name = "Speech-to-Text-Processing-System-Staging-Backend"
+location                  = "uksouth"
 
-# Storage                 
-storage_account_name   = "sttprocessingstage"
-storage_container_name = "statecontainerstage"
-state_key_backend      = "backend/terraform.tfstate"
-state_key_deployment   = "development/terraform.tfstate"
-
-# Event Hub 
-eventhub_namespace      = "speech-to-text-processing-system-staging"
-eventhub_name           = "speech-to-text-processing-system-staging"
-eventhub_auth_rule_name = "event-auth-rule-staging"
+# Storage                       
+state_storage_account_name   = "stagingbackendstt"
+state_storage_container_name = "stage-state-container-bakend"
+state_key_backend            = "backend/terraform.tfstate"
+state_key_deployment         = "staging/terraform.tfstate"
 
 # Environment Tags
-env_tags = {
-  environment = "staging-backend"
-  project     = "staging-Speech-to-Text-Processing-System"
-  owner       = "staging-backend-team"
-  cost_center = "staging-Speech-to-Text-Processing-System"
+tags = {
+  environment = "Staging-backend"
+  project     = "Staging-Speech-to-Text-Processing-System"
+  owner       = "development-team"
+  cost_center = "Staging-Speech-to-Text-Processing-System"
 }
 
 # Backend Tags
