@@ -21,12 +21,13 @@ resource "kubernetes_config_map_v1" "speech_config_map" {
   }
 
   data = {
-    SPEECH_ENDPOINT          = "https://${var.cognitive_account_name}.cognitiveservices.azure.com/"
-    SPEECH_REGION            = var.location
-    SERVICE_BUS_NAMESPACE    = var.service_bus_namespace
-    SERVICE_BUS_QUEUE_SPEECH = var.speech_queue
-    STORAGE_ACCOUNT_NAME     = var.storage_account_name
-    STORAGE_CONTAINER_NAME   = var.transcripts_container_name
+    SPEECH_ENDPOINT            = "https://${var.cognitive_account_name}.cognitiveservices.azure.com/"
+    SPEECH_REGION              = var.location
+    SERVICE_BUS_NAMESPACE      = var.service_bus_namespace
+    SERVICE_BUS_QUEUE_SPEECH   = var.speech_queue
+    STORAGE_ACCOUNT_NAME       = var.storage_account_name
+    AUDIO_CONTAINER_NAME       = var.audio_container_name
+    TRANSCRIPTS_CONTAINER_NAME = var.transcripts_container_name
   }
 }
 
@@ -42,6 +43,17 @@ resource "kubernetes_secret_v1" "speech_secret" {
   }
 
   type = "Opaque"
+}
+
+# Service Account
+resource "kubernetes_service_account_v1" "speech_worker_sa" {
+  metadata {
+    name      = "speech-worker-sa"
+    namespace = kubernetes_namespace_v1.speech.metadata[0].name
+    annotations = {
+      "azure.workload.identity/client-id" = var.uai_speech_worker_name
+    }
+  }
 }
 
 # Deployment - Speech 
@@ -64,6 +76,8 @@ resource "kubernetes_deployment_v1" "speech_worker" {
       }
 
       spec {
+        service_account_name = kubernetes_namespace_v1.speech.metadata[0].name
+
         container {
           name              = "speech-worker"
           image             = var.speech_worker_image

@@ -8,6 +8,7 @@ variable "k8_label_project_name" { type = string }
 # Config Map 
 variable "cognitive_account_name" { type = string }
 variable "search_index_name" { type = string }
+variable "audio_container_name" { type = string }
 variable "transcripts_container_name" { type = string }
 
 # Deployment
@@ -40,6 +41,7 @@ variable "service_bus_namespace" { type = string }
 variable "speech_key" { type = string }
 variable "speech_queue" { type = string }
 variable "speech_queue_id" { type = string }
+variable "uai_speech_worker_name" { type = string }
 
 # Search 
 variable "search_queue" { type = string }
