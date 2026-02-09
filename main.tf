@@ -15,12 +15,13 @@ module "storage" {
 
   storage_account_name = var.storage_account_name
 
+  # Network
+  pe_subnet_id = module.network.pe_subnet_id
+
   # Logs
   log_workspace_id = module.log-analytics.log_analytics_workspace_id
   storage_log_name = var.storage_log_name
 
-  # Network
-  pe_subnet_id = module.network.pe_subnet_id
 }
 
 module "log-analytics" {
@@ -30,6 +31,23 @@ module "log-analytics" {
   tags                = var.tags
 
   log_workspace_name = var.log_workspace_name
+}
+
+# UAI - RBAC 
+module "uai-rbac" {
+  source = "./modules/uai-rbac"
+  resource_group_name = module.resource_group.resource_group_name
+  location = var.location
+  tags = var.tags
+
+  storage_account_id = module.storage.storage_account_id
+  
+  # Speech
+  speech_id = module.cognitive.speech_id
+  uai_speech_worker_name = var.uai_speech_worker_name
+
+  # Queue
+  service_bus_id = module.queue.service_bus_id
 }
 # Key Vault
 module "key-vault" {
@@ -187,11 +205,13 @@ module "k8" {
   # Speech
   speech_key      = module.cognitive.speech_primary_key
   speech_queue_id = module.cognitive.speech_id
+  uai_speech_worker_name = var.uai_speech_worker_name
 
   # Search
 
   # Storage 
   storage_account_name       = var.storage_account_name
+  audio_container_name       = var.audio_container_name
   transcripts_container_name = module.storage.transcripts_container_name
 
   # Queue
@@ -257,9 +277,9 @@ module "cognitive" {
   pe_subnet_id = module.network.pe_subnet_id
 
   # Access
-  key_vault_id               = module.key-vault.key_vault_id
-  uai_name_search_service    = var.uai_name_search_service
-  uai_name_cognitive_account = var.uai_name_cognitive_account
+  key_vault_id                   = module.key-vault.key_vault_id
+  uai_name_search_service        = var.uai_name_search_service
+  uai_name_cognitive_account     = var.uai_name_cognitive_account
 
   depends_on = [module.resource_group]
 }

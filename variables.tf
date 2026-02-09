@@ -20,6 +20,7 @@ variable "service_bus_encryption_key_name" { type = string }
 # Storage 
 variable "storage_account_name" { type = string }
 variable "storage_log_name" { type = string }
+variable "uai_speech_worker_name" { type = string }
 
 # Log Analytics
 variable "log_workspace_name" { type = string }
@@ -49,6 +50,7 @@ variable "k8_label_project_name" { type = string }
 
 # K8 - Config Map 
 variable "search_index_name" { type = string }
+variable "audio_container_name" { type = string }
 variable "transcripts_container_name" { type = string }
 
 # K8 - Deployment
