@@ -40,7 +40,9 @@ module "uai-rbac" {
   location = var.location
   tags = var.tags
 
-  storage_account_id = module.storage.storage_account_id
+  # Storage
+  audio_container_id = module.storage.audio_container_id
+  transcripts_container_id = module.storage.transcripts_container_id
   
   # Speech
   speech_id = module.cognitive.speech_id
@@ -49,6 +51,7 @@ module "uai-rbac" {
   # Queue
   service_bus_id = module.queue.service_bus_id
 }
+
 # Key Vault
 module "key-vault" {
   source              = "./modules/key-vault"

@@ -7,14 +7,21 @@ resource "azurerm_user_assigned_identity" "speech_worker_uai" {
   location            = var.location
 }
 
-# RBAC - Speech Worker - Storage - K8 Worker
-resource "azurerm_role_assignment" "rbac_speech_worker_storage" {
-  scope                = var.storage_account_id
+# RBAC - Speech K8 Worker - Storage -  Audio Container  
+resource "azurerm_role_assignment" "rbac_speech_worker_audio_container" {
+  scope                = var.audio_container_id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_user_assigned_identity.speech_worker_uai.principal_id
 }
 
-# RBAC - K8 - Speech Worker  - Cognitve - K8 Worker
+# RBAC - Speech K8 Worker - Storage - Transcripts Container  
+resource "azurerm_role_assignment" "rbac_speech_worker_transcripts_container" {
+  scope                = var.transcripts_container_id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_user_assigned_identity.speech_worker_uai.principal_id
+}
+
+# RBAC - K8 - Speech Worker  - Speech 
 resource "azurerm_role_assignment" "rbac_cognitive_speech_worker" {
   scope                = var.speech_id
   role_definition_name = "Cognitive Services User"
