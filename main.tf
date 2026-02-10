@@ -34,18 +34,24 @@ module "log-analytics" {
 }
 
 # UAI - RBAC 
-module "uai-rbac" {
-  source = "./modules/uai-rbac"
+module "uai-rbac-fic" {
+  source              = "./modules/uai-rbac-fic"
   resource_group_name = module.resource_group.resource_group_name
-  location = var.location
-  tags = var.tags
+  location            = var.location
+  tags                = var.tags
+
+  # API
+  uai_api_worker_name      = var.uai_api_worker_name
+  service_bus_namespace_id = module.queue.service_bus_id
+  aks_oidc                 = module.aks.aks_oidc
+  k8_api_sa                = module.k8.k8_api_sa_name
 
   # Storage
-  audio_container_id = module.storage.audio_container_id
+  audio_container_id       = module.storage.audio_container_id
   transcripts_container_id = module.storage.transcripts_container_id
-  
+
   # Speech
-  speech_id = module.cognitive.speech_id
+  speech_id              = module.cognitive.speech_id
   uai_speech_worker_name = var.uai_speech_worker_name
 
   # Queue
@@ -189,8 +195,8 @@ module "k8" {
   k8_environment        = var.k8_environment
   k8_label_project_name = var.k8_label_project_name
 
-  # AKS
-  aks_oidc = module.aks.aks_oidc
+  # API
+  uai_api_worker_client_id = module.uai-rbac-fic.uai_api_worker_client_id
 
   # Provider
   kube_host                   = module.aks.kube_host
@@ -198,16 +204,13 @@ module "k8" {
   kube_client_key             = module.aks.kube_client_key
   kube_cluster_ca_certificate = module.aks.kube_cluster_ca_certificate
 
-  # API
-  uai_name_api = var.uai_name_api
-
   # Cognitive 
   cognitive_account_name = var.cognitive_account_name
   search_index_name      = module.cognitive.transcripts_index_name
 
   # Speech
-  speech_key      = module.cognitive.speech_primary_key
-  speech_queue_id = module.cognitive.speech_id
+  speech_key             = module.cognitive.speech_primary_key
+  speech_queue_id        = module.cognitive.speech_id
   uai_speech_worker_name = var.uai_speech_worker_name
 
   # Search
@@ -280,9 +283,9 @@ module "cognitive" {
   pe_subnet_id = module.network.pe_subnet_id
 
   # Access
-  key_vault_id                   = module.key-vault.key_vault_id
-  uai_name_search_service        = var.uai_name_search_service
-  uai_name_cognitive_account     = var.uai_name_cognitive_account
+  key_vault_id               = module.key-vault.key_vault_id
+  uai_name_search_service    = var.uai_name_search_service
+  uai_name_cognitive_account = var.uai_name_cognitive_account
 
   depends_on = [module.resource_group]
 }

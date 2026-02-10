@@ -60,7 +60,7 @@ variable "search_worker_image" { type = string }
 variable "storage_worker_image" { type = string }
 
 # K8 - API 
-variable "uai_name_api" { type = string }
+variable "uai_api_worker_name" { type = string }
 
 # Key Vault
 variable "key_vault_name" { type = string }
