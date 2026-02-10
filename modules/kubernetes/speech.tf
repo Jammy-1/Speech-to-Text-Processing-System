@@ -50,6 +50,11 @@ resource "kubernetes_service_account_v1" "speech_worker_sa" {
   metadata {
     name      = "speech-worker-sa"
     namespace = kubernetes_namespace_v1.speech.metadata[0].name
+
+    labels = {
+      "azure.workload.identity/use" = "true"
+    }
+
     annotations = {
       "azure.workload.identity/client-id" = var.uai_speech_worker_name
     }
