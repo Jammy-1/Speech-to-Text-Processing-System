@@ -5,26 +5,8 @@ variable "tags" { type = map(string) }
 variable "k8_environment" { type = string }
 variable "k8_label_project_name" { type = string }
 
-# Config Map 
-variable "cognitive_account_name" { type = string }
-variable "search_index_name" { type = string }
-variable "audio_container_name" { type = string }
-variable "transcripts_container_name" { type = string }
-
-# Deployment
-variable "speech_worker_image" { type = string }
-variable "api_worker_image" { type = string }
-variable "search_worker_image" { type = string }
-variable "storage_worker_image" { type = string }
-
-# Provider
-variable "kube_host" { type = string }
-variable "kube_client_certificate" { type = string }
-variable "kube_client_key" { type = string }
-variable "kube_cluster_ca_certificate" { type = string }
-
-# API 
-variable "uai_name_api" { type = string }
+#  API
+variable "uai_api_worker_client_id" { type = string }
 
 # Storage 
 variable "storage_account_name" { type = string }
@@ -46,5 +28,20 @@ variable "uai_speech_worker_name" { type = string }
 # Search 
 variable "search_queue" { type = string }
 
-# AKs
-variable "aks_oidc" { type = string }
+# Config Map 
+variable "cognitive_account_name" { type = string }
+variable "search_index_name" { type = string }
+variable "audio_container_name" { type = string }
+variable "transcripts_container_name" { type = string }
+
+# Deployment
+variable "speech_worker_image" { type = string }
+variable "api_worker_image" { type = string }
+variable "search_worker_image" { type = string }
+variable "storage_worker_image" { type = string }
+
+# Provider
+variable "kube_host" { type = string }
+variable "kube_client_certificate" { type = string }
+variable "kube_client_key" { type = string }
+variable "kube_cluster_ca_certificate" { type = string }
