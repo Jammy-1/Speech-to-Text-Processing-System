@@ -10,6 +10,7 @@ variable "transcripts_container_id" { type = string }
 # Speech
 variable "speech_id" { type = string }
 variable "uai_speech_worker_name" { type = string }
+variable "k8_speech_sa" { type = string }
 
 # API 
 variable "uai_api_worker_name" { type = string }
