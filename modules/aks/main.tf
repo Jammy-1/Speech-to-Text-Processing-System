@@ -16,7 +16,7 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.aks_uai.id]
+    identity_ids = [var.uai_aks_id]
   }
 
   default_node_pool {
@@ -53,26 +53,4 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   oms_agent { log_analytics_workspace_id = var.log_workspace_id }
-}
-
-# UAI- AKS
-resource "azurerm_user_assigned_identity" "aks_uai" {
-  name                = var.uai_aks_name
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  tags                = var.tags
-}
-
-# RBAC - Speech Key Access
-resource "azurerm_role_assignment" "rbac_aks_speech_key_access" {
-  scope                = var.rbac_aks_speech_key_access
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_user_assigned_identity.aks_uai.principal_id
-}
-
-# RBAC - Search Key Access
-resource "azurerm_role_assignment" "rbac_aks_search_key_access" {
-  scope                = var.rbac_aks_search_key_access
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_user_assigned_identity.aks_uai.principal_id
 }

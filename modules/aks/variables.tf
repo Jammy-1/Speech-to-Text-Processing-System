@@ -19,12 +19,9 @@ variable "aks_node_os_disk_size" { type = string }
 variable "log_workspace_id" { type = string }
 
 # UAI
-variable "uai_aks_name" { type = string }
+variable "uai_aks_id" { type = string }
 
 # Key Vault
-variable "key_vault_id" { type = string }
-variable "rbac_aks_speech_key_access" { type = string }
-variable "rbac_aks_search_key_access" { type = string }
 variable "disk_encryption_set_id" { type = string }
 
 # ACR
