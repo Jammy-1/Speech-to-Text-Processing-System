@@ -19,12 +19,12 @@ resource "azurerm_container_registry" "main" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.acr_uai.id]
+    identity_ids = [var.uai_acr_encryption_id]
   }
 
   encryption {
     key_vault_key_id   = var.acr_encryption_key_id
-    identity_client_id = azurerm_user_assigned_identity.acr_uai.client_id
+    identity_client_id = var.uai_acr_encryption_client_id
   }
 
   georeplications {
@@ -33,41 +33,4 @@ resource "azurerm_container_registry" "main" {
   }
 
   zone_redundancy_enabled = true
-}
-
-# UAI - ACR
-resource "azurerm_user_assigned_identity" "acr_uai" {
-  name                = var.uai_acr_name
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  tags                = var.tags
-}
-
-# UAI - CI/CD
-resource "azurerm_user_assigned_identity" "ci_cd_uai_acr" {
-  name                = var.uai_ci_cd_acr_name
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  tags                = var.tags
-}
-
-# RBAC - ACR UAI - Access Encryption Key
-resource "azurerm_role_assignment" "rbac_acr_encrypt_key_access" {
-  scope                = var.acr_encryption_key_id
-  role_definition_name = "Key Vault Crypto User"
-  principal_id         = azurerm_user_assigned_identity.acr_uai.principal_id
-}
-
-# RBAC - AKS Pull ACR Container
-resource "azurerm_role_assignment" "rbac_aks_acr_pull" {
-  scope                = azurerm_container_registry.main.id
-  role_definition_name = "AcrPull"
-  principal_id         = var.aks_uai_principal_id
-}
-
-# RBAC - CI/CD - ACR Push
-resource "azurerm_role_assignment" "rbac_ci_cd_acr" {
-  scope                = azurerm_container_registry.main.id
-  role_definition_name = "AcrPush"
-  principal_id         = azurerm_user_assigned_identity.ci_cd_uai_acr.principal_id
 }

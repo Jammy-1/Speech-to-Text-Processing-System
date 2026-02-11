@@ -46,6 +46,12 @@ module "uai-rbac-fic" {
   aks_oidc                 = module.aks.aks_oidc
   k8_api_sa                = module.k8.k8_api_sa_name
 
+  # ACR 
+  uai_acr_encryption_name = var.uai_acr_encryption_name
+  uai_ci_cd_acr_name      = var.uai_ci_cd_acr_name
+  acr_encryption_key_id   = module.key-vault.acr_encryption_key_id
+  acr_id                  = module.acr.acr_id
+
   # Storage
   audio_container_id       = module.storage.audio_container_id
   transcripts_container_id = module.storage.transcripts_container_id
@@ -53,6 +59,7 @@ module "uai-rbac-fic" {
   # Speech
   speech_id              = module.cognitive.speech_id
   uai_speech_worker_name = var.uai_speech_worker_name
+  k8_speech_sa           = module.k8.k8_speech_sa_name
 
   # Queue
   service_bus_id = module.queue.service_bus_id
@@ -179,12 +186,11 @@ module "acr" {
   acr_name     = var.acr_name
   uai_acr_name = var.acr_name
 
-  # Access
-  acr_encryption_key_id   = module.key-vault.acr_encryption_key_id
-  acr_encryption_key_name = var.acr_encryption_key_name
-  aks_uai_principal_id    = module.aks.aks_principal_id
-  uai_ci_cd_acr_name      = var.uai_ci_cd_acr_name
-
+  # UAI- RBAC 
+  uai_acr_encryption_client_id = module.uai-rbac-fic.uai_acr_encryption_client_id
+  uai_acr_encryption_id        = module.uai-rbac-fic.uai_acr_encryption_id
+  acr_encryption_key_id        = module.key-vault.acr_encryption_key_id
+  aks_uai_principal_id         = module.aks.aks_principal_id
 }
 
 # K8

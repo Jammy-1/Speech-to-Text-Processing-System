@@ -27,7 +27,7 @@ variable "log_workspace_name" { type = string }
 
 # ACR
 variable "acr_name" {}
-variable "uai_acr_name" { type = string }
+variable "uai_acr_encryption_name" { type = string }
 variable "uai_ci_cd_acr_name" { type = string }
 
 # AKS
