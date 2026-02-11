@@ -52,6 +52,11 @@ module "uai-rbac-fic" {
   acr_encryption_key_id   = module.key-vault.acr_encryption_key_id
   acr_id                  = module.acr.acr_id
 
+  # AKS
+  uai_aks_name           = var.uai_aks_name
+  disk_encryption_set_id = module.key-vault.aks_disk_encryption_key_id
+  aks_subnet_id          = module.network.aks_subnet_id
+
   # Storage
   audio_container_id       = module.storage.audio_container_id
   transcripts_container_id = module.storage.transcripts_container_id
@@ -96,7 +101,7 @@ module "key-vault" {
   search_primary_key = module.cognitive.search_primary_key
 
   # AKS
-  aks_principal_id             = module.aks.aks_principal_id
+  aks_principal_id             = module.uai-rbac-fic.uai_aks_principal_id
   aks_disk_encryption_key_name = var.acr_encryption_key_name
 
   depends_on = [module.resource_group]
@@ -190,7 +195,7 @@ module "acr" {
   uai_acr_encryption_client_id = module.uai-rbac-fic.uai_acr_encryption_client_id
   uai_acr_encryption_id        = module.uai-rbac-fic.uai_acr_encryption_id
   acr_encryption_key_id        = module.key-vault.acr_encryption_key_id
-  aks_uai_principal_id         = module.aks.aks_principal_id
+  aks_uai_principal_id         = module.uai-rbac-fic.uai_aks_principal_id
 }
 
 # K8
@@ -253,7 +258,7 @@ module "aks" {
   tags                = var.tags
 
   kubernetes_cluster_name = var.kubernetes_cluster_name
-  uai_aks_name            = var.uai_aks_name
+  uai_aks_id              = module.uai-rbac-fic.uai_aks_id
 
   # Network
   aks_dns       = var.aks_dns
@@ -268,11 +273,6 @@ module "aks" {
   log_workspace_id       = module.log-analytics.log_analytics_workspace_id
   disk_encryption_set_id = module.key-vault.aks_disk_encryption_key_id
   acr_id                 = module.acr.acr_id
-
-  # Access
-  key_vault_id               = module.key-vault.key_vault_id
-  rbac_aks_speech_key_access = module.key-vault.key_vault_id
-  rbac_aks_search_key_access = module.key-vault.key_vault_id
 }
 
 # Cognitive
@@ -315,7 +315,7 @@ module "queue" {
   service_bus_encryption_key_id = module.key-vault.service_bus_encryption_key_id
 
   # AKS
-  aks_uai_principal_id = module.aks.aks_principal_id
+  aks_uai_principal_id = module.uai-rbac-fic.uai_aks_principal_id
 
   depends_on = [module.resource_group]
 }
