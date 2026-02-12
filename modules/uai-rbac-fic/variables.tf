@@ -10,11 +10,15 @@ variable "transcripts_container_id" { type = string }
 # Speech
 variable "speech_id" { type = string }
 variable "uai_speech_worker_name" { type = string }
-variable "k8_speech_sa" { type = string }
+
+# Search 
+variable "uai_search_service_name" { type = string }
+variable "search_service_id" { type = string }
+variable "key_vault_id" { type = string }
+variable "uai_search_worker_name" { type = string }
 
 # API 
 variable "uai_api_worker_name" { type = string }
-variable "k8_api_sa" { type = string }
 
 # Queue
 variable "service_bus_id" { type = string }

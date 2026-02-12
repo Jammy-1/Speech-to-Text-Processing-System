@@ -1,6 +1,10 @@
 # Speech 
 output "speech_worker_uai_principal_id" { value = azurerm_user_assigned_identity.speech_worker_uai.principal_id }
 
+# Search 
+output "uai_search_service_id" { value = azurerm_user_assigned_identity.search_service_uai.id }
+output "search_index_contributor_role_id" { value = azurerm_role_assignment.search_index_contributor.id }
+
 # API
 output "uai_api_worker_client_id" { value = azurerm_user_assigned_identity.api_uai.client_id }
 
