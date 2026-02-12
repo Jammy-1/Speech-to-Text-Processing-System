@@ -29,10 +29,9 @@ resource "azurerm_search_service" "search_service" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.search_service_uai.id]
+    identity_ids = [var.search_service_uai_id]
   }
 }
-
 
 # Search Index
 resource "azapi_data_plane_resource" "transcripts_index" {
@@ -53,35 +52,4 @@ resource "azapi_data_plane_resource" "transcripts_index" {
       { name = "transcript_chunk", type = "Edm.String", searchable = true, analyzer = "en.microsoft" },
     ]
   }
-  depends_on = [
-    azurerm_role_assignment.search_index_contributor,
-  ]
-}
-
-# Role Definition- Seearch Index
-data "azurerm_role_definition" "search_index_data_contributor" {
-  name  = "Search Index Data Contributor"
-  scope = azurerm_search_service.search_service.id
-}
-
-# RBAC - Search Index
-resource "azurerm_role_assignment" "search_index_contributor" {
-  scope              = azurerm_search_service.search_service.id
-  role_definition_id = data.azurerm_role_definition.search_index_data_contributor.id
-  principal_id       = data.azurerm_client_config.current.object_id
-}
-
-# RBAC - Search Service
-resource "azurerm_role_assignment" "search_service_rbac" {
-  scope                = var.key_vault_id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_user_assigned_identity.search_service_uai.principal_id
-}
-
-# UAI - Search Service
-resource "azurerm_user_assigned_identity" "search_service_uai" {
-  name                = var.uai_name_search_service
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  tags                = var.tags
 }
