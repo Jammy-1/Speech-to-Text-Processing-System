@@ -3,12 +3,15 @@ variable "resource_group_name" { type = string }
 variable "location" { type = string }
 variable "tags" { type = map(string) }
 
-# Cognitive
+# Cognitive Speehc
 variable "cognitive_account_name" { type = string }
 variable "uai_name_cognitive_account" { type = string }
 
+# Search 
 variable "search_service_name" { type = string }
-variable "uai_name_search_service" { type = string }
+
+variable "uai_search_service_name" { type = string }
+variable "uai_search_worker_name" { type = string }
 
 # Queue / Service Bus
 variable "service_bus" { type = string }

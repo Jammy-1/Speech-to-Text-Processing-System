@@ -44,7 +44,6 @@ module "uai-rbac-fic" {
   uai_api_worker_name      = var.uai_api_worker_name
   service_bus_namespace_id = module.queue.service_bus_id
   aks_oidc                 = module.aks.aks_oidc
-  k8_api_sa                = module.k8.k8_api_sa_name
 
   # ACR 
   uai_acr_encryption_name = var.uai_acr_encryption_name
@@ -64,7 +63,12 @@ module "uai-rbac-fic" {
   # Speech
   speech_id              = module.cognitive.speech_id
   uai_speech_worker_name = var.uai_speech_worker_name
-  k8_speech_sa           = module.k8.k8_speech_sa_name
+
+  # Search
+  uai_search_service_name = var.search_service_name
+  uai_search_worker_name  = var.uai_search_worker_name
+  search_service_id       = module.cognitive.search_id
+  key_vault_id            = module.key-vault.key_vault_id
 
   # Queue
   service_bus_id = module.queue.service_bus_id
@@ -225,6 +229,7 @@ module "k8" {
   uai_speech_worker_name = var.uai_speech_worker_name
 
   # Search
+  uai_search_worker_name = var.uai_search_service_name
 
   # Storage 
   storage_account_name       = var.storage_account_name
@@ -282,15 +287,19 @@ module "cognitive" {
   location            = var.location
   tags                = var.tags
 
+  # Speech
   cognitive_account_name = var.cognitive_account_name
-  search_service_name    = var.search_service_name
+
+  #Search
+  search_service_name   = var.search_service_name
+  search_service_uai_id = module.uai-rbac-fic.uai_search_service_id
 
   # Subnet 
   pe_subnet_id = module.network.pe_subnet_id
 
   # Access
-  key_vault_id               = module.key-vault.key_vault_id
-  uai_name_search_service    = var.uai_name_search_service
+  key_vault_id = module.key-vault.key_vault_id
+
   uai_name_cognitive_account = var.uai_name_cognitive_account
 
   depends_on = [module.resource_group]
