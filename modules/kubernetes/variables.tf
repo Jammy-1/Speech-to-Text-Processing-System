@@ -27,6 +27,7 @@ variable "uai_speech_worker_name" { type = string }
 
 # Search 
 variable "search_queue" { type = string }
+variable "uai_search_worker_name" { type = string }
 
 # Config Map 
 variable "cognitive_account_name" { type = string }

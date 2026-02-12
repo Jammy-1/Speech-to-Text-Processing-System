@@ -30,6 +30,22 @@ resource "kubernetes_config_map_v1" "search_config_map" {
   }
 }
 
+# Service Account
+resource "kubernetes_service_account_v1" "search_worker_sa" {
+  metadata {
+    name      = "search-worker-sa"
+    namespace = kubernetes_namespace_v1.search.metadata[0].name
+
+    labels = {
+      "azure.workload.identity/use" = "true"
+    }
+
+    annotations = {
+      "azure.workload.identity/client-id" = var.uai_search_worker_name
+    }
+  }
+}
+
 # Deployment - Search 
 resource "kubernetes_deployment_v1" "search_worker" {
   metadata {
