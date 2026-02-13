@@ -4,6 +4,7 @@ variable "location" { type = string }
 variable "tags" { type = map(string) }
 
 # Storage 
+variable "uai_storage_worker_name" { type = string }
 variable "audio_container_id" { type = string }
 variable "transcripts_container_id" { type = string }
 
