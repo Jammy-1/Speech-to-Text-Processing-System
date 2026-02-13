@@ -59,6 +59,7 @@ module "uai-rbac-fic" {
   # Storage
   audio_container_id       = module.storage.audio_container_id
   transcripts_container_id = module.storage.transcripts_container_id
+  uai_storage_worker_name  = var.uai_storage_worker_name
 
   # Speech
   speech_id              = module.cognitive.speech_id
@@ -235,6 +236,7 @@ module "k8" {
   storage_account_name       = var.storage_account_name
   audio_container_name       = var.audio_container_name
   transcripts_container_name = module.storage.transcripts_container_name
+  uai_storage_worker_name    = var.uai_storage_worker_name
 
   # Queue
   service_bus_name      = var.service_bus

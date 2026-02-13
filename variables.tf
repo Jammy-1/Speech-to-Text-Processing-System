@@ -62,6 +62,9 @@ variable "speech_worker_image" { type = string }
 variable "search_worker_image" { type = string }
 variable "storage_worker_image" { type = string }
 
+# K8 - Storage
+variable "uai_storage_worker_name" { type = string }
+
 # K8 - API 
 variable "uai_api_worker_name" { type = string }
 
