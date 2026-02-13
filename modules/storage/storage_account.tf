@@ -1,5 +1,5 @@
 # Storage Account
-resource "azurerm_storage_account" "main" {
+resource "azurerm_storage_account" "storage_account" {
   name                = var.storage_account_name
   resource_group_name = var.resource_group_name
   location            = var.location
@@ -21,21 +21,21 @@ resource "azurerm_storage_account" "main" {
 # Container - Audio 
 resource "azurerm_storage_container" "audio" {
   name                  = "audio"
-  storage_account_id    = azurerm_storage_account.main.id
+  storage_account_id    = azurerm_storage_account.storage_account.id
   container_access_type = "private"
 }
 
 # Container - Transcripts
 resource "azurerm_storage_container" "transcripts" {
   name                  = "transcripts"
-  storage_account_id    = azurerm_storage_account.main.id
+  storage_account_id    = azurerm_storage_account.storage_account.id
   container_access_type = "private"
 }
 
 # Monitoring
 resource "azurerm_monitor_diagnostic_setting" "storage_logs" {
   name                       = var.storage_log_name
-  target_resource_id         = azurerm_storage_account.main.id
+  target_resource_id         = azurerm_storage_account.storage_account.id
   log_analytics_workspace_id = var.log_workspace_id
 
   enabled_log { category = "StorageRead" }
