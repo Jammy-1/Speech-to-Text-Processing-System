@@ -1,6 +1,6 @@
 # UAI & RBAC For Speech - modules\cognitive\speech.tf
 
-# Kubernetes 
+# Kubernetes - modules\kubernetes\speech.tf
 
 # UAI Used On K8 Speech Worker
 resource "azurerm_user_assigned_identity" "speech_worker_uai" {
@@ -31,16 +31,13 @@ resource "azurerm_role_assignment" "rbac_cognitive_speech_worker" {
 }
 
 # FIC - Speech Worker 
-resource "azurerm_federated_identity_credential" "speech_worker_fic" {
+resource "azurerm_federated_identity_credential" "fic_speech_worker" {
   name                = "speech-worker-fic"
   resource_group_name = var.resource_group_name
   parent_id           = azurerm_user_assigned_identity.speech_worker_uai.id
-  issuer              = var.aks_oidc 
+  issuer              = var.aks_oidc
   subject             = "system:serviceaccount:speech-stt:speech-worker-sa"
   audience            = ["api://AzureADTokenExchange"]
 
-  depends_on = [
-    azurerm_user_assigned_identity.speech_worker_uai,
-    var.k8_api_sa
-  ]
+  depends_on = [azurerm_user_assigned_identity.speech_worker_uai]
 }
