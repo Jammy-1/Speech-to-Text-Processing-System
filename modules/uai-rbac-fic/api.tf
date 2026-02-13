@@ -9,7 +9,7 @@ resource "azurerm_user_assigned_identity" "api_uai" {
 }
 
 # RBAC - API Service Bus Sender
-resource "azurerm_role_assignment" "api_sb_sender_rbac" {
+resource "azurerm_role_assignment" "rbac_api_sb_sender" {
   scope                = var.service_bus_namespace_id
   role_definition_name = "Azure Service Bus Data Sender"
   principal_id         = azurerm_user_assigned_identity.api_uai.principal_id
@@ -24,7 +24,5 @@ resource "azurerm_federated_identity_credential" "api_fic" {
   subject             = "system:serviceaccount:api-stt:api-sa"
   audience            = ["api://AzureADTokenExchange"]
 
-  depends_on = [
-    azurerm_user_assigned_identity.api_uai, var.k8_api_sa
-  ]
+  depends_on = [azurerm_user_assigned_identity.api_uai]
 }
