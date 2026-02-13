@@ -28,6 +28,22 @@ resource "kubernetes_config_map_v1" "storage_config_map" {
   }
 }
 
+# Service Account - Storage SA
+resource "kubernetes_service_account_v1" "storage_worker_sa" {
+  metadata {
+    name      = "storage-worker-sa"
+    namespace = kubernetes_namespace_v1.storage.metadata[0].name
+
+    labels = {
+      "azure.workload.identity/use" = "true"
+    }
+
+    annotations = {
+      "azure.workload.identity/client-id" = var.uai_storage_worker_name
+    }
+  }
+}
+
 # Deployment - Storage
 resource "kubernetes_deployment_v1" "storage_worker" {
   metadata {

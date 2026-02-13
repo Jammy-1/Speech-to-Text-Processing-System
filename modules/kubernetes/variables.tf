@@ -11,6 +11,7 @@ variable "uai_api_worker_client_id" { type = string }
 # Storage 
 variable "storage_account_name" { type = string }
 variable "storage_queue" { type = string }
+variable "uai_storage_worker_name" { type = string }
 
 # Cognitive
 variable "search_service_name" { type = string }
