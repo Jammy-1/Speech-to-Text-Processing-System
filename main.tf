@@ -126,6 +126,9 @@ module "uai-rbac-fic" {
   search_service_id       = module.cognitive.search_id
   key_vault_id            = module.key-vault.key_vault_id
 
+  # Key Vault
+  uai_ci_cd_kv_admin_name = var.uai_ci_cd_kv_admin_name
+
   # Queue
   service_bus_id = module.queue.service_bus_id
 
@@ -147,9 +150,6 @@ module "key-vault" {
 
   #Network
   pe_subnet_id = module.network.pe_subnet_id
-
-  # UAI
-  uai_ci_cd_kv_admin_name = var.uai_ci_cd_kv_admin_name
 
   # ACR
   acr_encryption_key_name = var.acr_encryption_key_name
