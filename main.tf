@@ -21,19 +21,74 @@ module "storage" {
   # Logs
   log_workspace_id = module.log-analytics.log_analytics_workspace_id
   storage_log_name = var.storage_log_name
-
 }
 
-module "log-analytics" {
-  source              = "./modules/log-analytics"
+# Cognitive - Speech & Search
+module "cognitive" {
+  source              = "./modules/cognitive"
   resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   tags                = var.tags
 
-  log_workspace_name = var.log_workspace_name
+  # Speech
+  cognitive_account_name = var.cognitive_account_name
+
+  #Search
+  search_service_name   = var.search_service_name
+  search_service_uai_id = module.uai-rbac-fic.uai_search_service_id
+
+  # Subnet 
+  pe_subnet_id = module.network.pe_subnet_id
+
+  # Access
+  key_vault_id = module.key-vault.key_vault_id
+  uai_name_cognitive_account = var.uai_name_cognitive_account
+  depends_on = [module.resource_group]
 }
 
-# UAI - RBAC 
+# ACR
+module "acr" {
+  source              = "./modules/acr"
+  resource_group_name = module.resource_group.resource_group_name
+  location            = var.location
+  tags                = var.tags
+
+  acr_name     = var.acr_name
+  uai_acr_name = var.acr_name
+
+  # UAI- RBAC 
+  uai_acr_encryption_client_id = module.uai-rbac-fic.uai_acr_encryption_client_id
+  uai_acr_encryption_id        = module.uai-rbac-fic.uai_acr_encryption_id
+  acr_encryption_key_id        = module.key-vault.acr_encryption_key_id
+  aks_uai_principal_id         = module.uai-rbac-fic.uai_aks_principal_id
+}
+
+# AKS
+module "aks" {
+  source              = "./modules/aks"
+  resource_group_name = module.resource_group.resource_group_name
+  location            = var.location
+  tags                = var.tags
+
+  kubernetes_cluster_name = var.kubernetes_cluster_name
+  uai_aks_id              = module.uai-rbac-fic.uai_aks_id
+
+  # Network
+  aks_dns       = var.aks_dns
+  aks_subnet_id = module.network.aks_subnet_id
+
+  # AKS Parameters
+  aks_node_pool_name     = var.aks_node_pool_name
+  aks_node_scaling_min   = var.aks_node_scaling_min
+  aks_node_scaling_max   = var.aks_node_scaling_max
+  aks_node_size          = var.aks_node_size
+  aks_node_os_disk_size  = var.aks_node_os_disk_size
+  log_workspace_id       = module.log-analytics.log_analytics_workspace_id
+  disk_encryption_set_id = module.key-vault.aks_disk_encryption_key_id
+  acr_id                 = module.acr.acr_id
+}
+
+# UAI - RBAC - FIC
 module "uai-rbac-fic" {
   source              = "./modules/uai-rbac-fic"
   resource_group_name = module.resource_group.resource_group_name
@@ -73,6 +128,8 @@ module "uai-rbac-fic" {
 
   # Queue
   service_bus_id = module.queue.service_bus_id
+
+  depends_on = [ module.resource_group ]
 }
 
 # Key Vault
@@ -110,6 +167,92 @@ module "key-vault" {
   aks_disk_encryption_key_name = var.acr_encryption_key_name
 
   depends_on = [module.resource_group]
+}
+
+# Queue
+module "queue" {
+  source              = "./modules/queue"
+  resource_group_name = module.resource_group.resource_group_name
+  location            = var.location
+  tags                = var.tags
+
+  key_vault_id = module.key-vault.key_vault_id
+
+  # Names
+  speech_queue_name  = var.speech_queue
+  search_queue_name  = var.search_queue
+  storage_queue_name = var.storage_queue
+
+  # Service Bus 
+  service_bus_name              = var.service_bus
+  service_bus_encryption_key_id = module.key-vault.service_bus_encryption_key_id
+
+  # AKS
+  aks_uai_principal_id = module.uai-rbac-fic.uai_aks_principal_id
+
+  depends_on = [module.resource_group]
+}
+
+module "log-analytics" {
+  source              = "./modules/log-analytics"
+  resource_group_name = module.resource_group.resource_group_name
+  location            = var.location
+  tags                = var.tags
+
+  log_workspace_name = var.log_workspace_name
+}
+
+# K8
+module "k8" {
+  source                = "./modules/kubernetes"
+  resource_group_name   = module.resource_group.resource_group_name
+  location              = var.location
+  k8_environment        = var.k8_environment
+  k8_label_project_name = var.k8_label_project_name
+
+  # API
+  uai_api_worker_client_id = module.uai-rbac-fic.uai_api_worker_client_id
+
+  # Provider
+  kube_host                   = module.aks.kube_host
+  kube_client_certificate     = module.aks.kube_client_certificate
+  kube_client_key             = module.aks.kube_client_key
+  kube_cluster_ca_certificate = module.aks.kube_cluster_ca_certificate
+
+  # Cognitive 
+  cognitive_account_name = var.cognitive_account_name
+  search_index_name      = module.cognitive.transcripts_index_name
+
+  # Speech
+  speech_key             = module.cognitive.speech_primary_key
+  speech_queue_id        = module.cognitive.speech_id
+  uai_speech_worker_name = var.uai_speech_worker_name
+
+  # Search
+  uai_search_worker_name = var.uai_search_service_name
+
+  # Storage 
+  storage_account_name       = var.storage_account_name
+  audio_container_name       = var.audio_container_name
+  transcripts_container_name = module.storage.transcripts_container_name
+  uai_storage_worker_name    = var.uai_storage_worker_name
+
+  # Queue
+  service_bus_name      = var.service_bus
+  search_service_name   = var.search_service_name
+  service_bus_namespace = module.queue.service_bus_namespace
+
+  search_queue  = var.search_queue
+  speech_queue  = var.speech_queue
+  storage_queue = var.storage_queue
+
+  # Worker Images
+  api_worker_image     = var.api_worker_image
+  speech_worker_image  = var.speech_worker_image
+  search_worker_image  = var.search_worker_image
+  storage_worker_image = var.storage_worker_image
+
+  tags = var.tags
 }
 
 # Network
@@ -185,149 +328,3 @@ module "network" {
 
   depends_on = [module.resource_group]
 }
-
-# ACR
-module "acr" {
-  source              = "./modules/acr"
-  resource_group_name = module.resource_group.resource_group_name
-  location            = var.location
-  tags                = var.tags
-
-  acr_name     = var.acr_name
-  uai_acr_name = var.acr_name
-
-  # UAI- RBAC 
-  uai_acr_encryption_client_id = module.uai-rbac-fic.uai_acr_encryption_client_id
-  uai_acr_encryption_id        = module.uai-rbac-fic.uai_acr_encryption_id
-  acr_encryption_key_id        = module.key-vault.acr_encryption_key_id
-  aks_uai_principal_id         = module.uai-rbac-fic.uai_aks_principal_id
-}
-
-# K8
-module "k8" {
-  source                = "./modules/kubernetes"
-  resource_group_name   = module.resource_group.resource_group_name
-  location              = var.location
-  k8_environment        = var.k8_environment
-  k8_label_project_name = var.k8_label_project_name
-
-  # API
-  uai_api_worker_client_id = module.uai-rbac-fic.uai_api_worker_client_id
-
-  # Provider
-  kube_host                   = module.aks.kube_host
-  kube_client_certificate     = module.aks.kube_client_certificate
-  kube_client_key             = module.aks.kube_client_key
-  kube_cluster_ca_certificate = module.aks.kube_cluster_ca_certificate
-
-  # Cognitive 
-  cognitive_account_name = var.cognitive_account_name
-  search_index_name      = module.cognitive.transcripts_index_name
-
-  # Speech
-  speech_key             = module.cognitive.speech_primary_key
-  speech_queue_id        = module.cognitive.speech_id
-  uai_speech_worker_name = var.uai_speech_worker_name
-
-  # Search
-  uai_search_worker_name = var.uai_search_service_name
-
-  # Storage 
-  storage_account_name       = var.storage_account_name
-  audio_container_name       = var.audio_container_name
-  transcripts_container_name = module.storage.transcripts_container_name
-  uai_storage_worker_name    = var.uai_storage_worker_name
-
-  # Queue
-  service_bus_name      = var.service_bus
-  search_service_name   = var.search_service_name
-  service_bus_namespace = module.queue.service_bus_namespace
-
-  search_queue  = var.search_queue
-  speech_queue  = var.speech_queue
-  storage_queue = var.storage_queue
-
-  # Worker Images
-  api_worker_image     = var.api_worker_image
-  speech_worker_image  = var.speech_worker_image
-  search_worker_image  = var.search_worker_image
-  storage_worker_image = var.storage_worker_image
-
-  tags = var.tags
-}
-
-
-# AKS
-module "aks" {
-  source              = "./modules/aks"
-  resource_group_name = module.resource_group.resource_group_name
-  location            = var.location
-  tags                = var.tags
-
-  kubernetes_cluster_name = var.kubernetes_cluster_name
-  uai_aks_id              = module.uai-rbac-fic.uai_aks_id
-
-  # Network
-  aks_dns       = var.aks_dns
-  aks_subnet_id = module.network.aks_subnet_id
-
-  # AKS Parameters
-  aks_node_pool_name     = var.aks_node_pool_name
-  aks_node_scaling_min   = var.aks_node_scaling_min
-  aks_node_scaling_max   = var.aks_node_scaling_max
-  aks_node_size          = var.aks_node_size
-  aks_node_os_disk_size  = var.aks_node_os_disk_size
-  log_workspace_id       = module.log-analytics.log_analytics_workspace_id
-  disk_encryption_set_id = module.key-vault.aks_disk_encryption_key_id
-  acr_id                 = module.acr.acr_id
-}
-
-# Cognitive
-module "cognitive" {
-  source              = "./modules/cognitive"
-  resource_group_name = module.resource_group.resource_group_name
-  location            = var.location
-  tags                = var.tags
-
-  # Speech
-  cognitive_account_name = var.cognitive_account_name
-
-  #Search
-  search_service_name   = var.search_service_name
-  search_service_uai_id = module.uai-rbac-fic.uai_search_service_id
-
-  # Subnet 
-  pe_subnet_id = module.network.pe_subnet_id
-
-  # Access
-  key_vault_id = module.key-vault.key_vault_id
-
-  uai_name_cognitive_account = var.uai_name_cognitive_account
-
-  depends_on = [module.resource_group]
-}
-
-# Queue
-module "queue" {
-  source              = "./modules/queue"
-  resource_group_name = module.resource_group.resource_group_name
-  location            = var.location
-  tags                = var.tags
-
-  key_vault_id = module.key-vault.key_vault_id
-
-  # Names
-  speech_queue_name  = var.speech_queue
-  search_queue_name  = var.search_queue
-  storage_queue_name = var.storage_queue
-
-  # Service Bus 
-  service_bus_name              = var.service_bus
-  service_bus_encryption_key_id = module.key-vault.service_bus_encryption_key_id
-
-  # AKS
-  aks_uai_principal_id = module.uai-rbac-fic.uai_aks_principal_id
-
-  depends_on = [module.resource_group]
-}
-
