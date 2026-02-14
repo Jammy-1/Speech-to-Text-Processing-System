@@ -15,7 +15,6 @@ variable "uai_speech_worker_name" { type = string }
 # Search 
 variable "uai_search_service_name" { type = string }
 variable "search_service_id" { type = string }
-variable "key_vault_id" { type = string }
 variable "uai_search_worker_name" { type = string }
 
 # API 
@@ -36,3 +35,7 @@ variable "uai_acr_encryption_name" { type = string }
 variable "acr_encryption_key_id" { type = string }
 variable "uai_ci_cd_acr_name" { type = string }
 variable "acr_id" { type = string }
+
+# Key Vault
+variable "key_vault_id" { type = string }
+variable "uai_ci_cd_kv_admin_name" { type = string }
