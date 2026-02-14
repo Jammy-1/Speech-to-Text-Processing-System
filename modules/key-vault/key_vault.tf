@@ -1,5 +1,5 @@
 # Key Vault
-resource "azurerm_key_vault" "main" {
+resource "azurerm_key_vault" "key_vault" {
   name                = var.key_vault_name
   resource_group_name = var.resource_group_name
   location            = var.location
@@ -27,12 +27,12 @@ resource "azurerm_user_assigned_identity" "ci_cd_uai_kv_admin" {
   location            = var.location
   tags                = var.tags
 
-  depends_on = [azurerm_key_vault.main]
+  depends_on = [azurerm_key_vault.key_vault]
 }
 
 # RBAC - CI/CD - KV Admin
 resource "azurerm_role_assignment" "rbac_ci_cd_kv_admin" {
-  scope                = azurerm_key_vault.main.id
+  scope                = azurerm_key_vault.key_vault.id
   role_definition_name = "Key Vault Administrator"
   principal_id         = azurerm_user_assigned_identity.ci_cd_uai_kv_admin.principal_id
 
@@ -42,7 +42,7 @@ resource "azurerm_role_assignment" "rbac_ci_cd_kv_admin" {
 # Key - ACR Encryption 
 resource "azurerm_key_vault_key" "acr_encryption_key" {
   name            = var.acr_encryption_key_name
-  key_vault_id    = azurerm_key_vault.main.id
+  key_vault_id    = azurerm_key_vault.key_vault.id
   key_type        = "RSA-HSM"
   key_size        = 2048
   key_opts        = ["encrypt", "decrypt"]
@@ -50,13 +50,13 @@ resource "azurerm_key_vault_key" "acr_encryption_key" {
 
   tags = var.tags
 
-  depends_on = [azurerm_key_vault.main]
+  depends_on = [azurerm_key_vault.key_vault]
 }
 
 # Key - AKS Encryption 
 resource "azurerm_key_vault_key" "aks_encryption_key" {
   name            = var.aks_disk_encryption_key_name
-  key_vault_id    = azurerm_key_vault.main.id
+  key_vault_id    = azurerm_key_vault.key_vault.id
   key_type        = "RSA-HSM"
   key_size        = 2048
   key_opts        = ["encrypt", "decrypt"]
@@ -64,13 +64,13 @@ resource "azurerm_key_vault_key" "aks_encryption_key" {
 
   tags = var.tags
 
-  depends_on = [azurerm_key_vault.main]
+  depends_on = [azurerm_key_vault.key_vault]
 }
 
 # Key - Service Bus Encryption 
 resource "azurerm_key_vault_key" "service_bus_encryption_key" {
   name            = var.servicebus_encryption_key_name
-  key_vault_id    = azurerm_key_vault.main.id
+  key_vault_id    = azurerm_key_vault.key_vault.id
   key_type        = "RSA-HSM"
   key_size        = 2048
   key_opts        = ["encrypt", "decrypt"]
@@ -78,33 +78,33 @@ resource "azurerm_key_vault_key" "service_bus_encryption_key" {
 
   tags = var.tags
 
-  depends_on = [azurerm_key_vault.main]
+  depends_on = [azurerm_key_vault.key_vault]
 }
 
 # Secret - Speech Key
 resource "azurerm_key_vault_secret" "speech_key" {
   name         = var.speech_key_name
   value        = var.speech_primary_key
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = azurerm_key_vault.key_vault.id
 
   content_type    = "text/plain"
   expiration_date = timeadd(timestamp(), "4380h")
 
   tags = var.tags
 
-  depends_on = [azurerm_key_vault.main]
+  depends_on = [azurerm_key_vault.key_vault]
 }
 
 # Secret - Search Key
 resource "azurerm_key_vault_secret" "search_key" {
   name         = var.search_key_name
   value        = var.search_primary_key
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = azurerm_key_vault.key_vault.id
 
   content_type    = "text/plain"
   expiration_date = timeadd(timestamp(), "4380h")
 
   tags = var.tags
 
-  depends_on = [azurerm_key_vault.main]
+  depends_on = [azurerm_key_vault.key_vault]
 }
