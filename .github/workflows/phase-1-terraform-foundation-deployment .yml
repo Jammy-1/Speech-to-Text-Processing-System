@@ -1,5 +1,5 @@
 # Phase 1 - Foundation - Resource Group, Networking, Logging & Key Vault
-name: Terraform Foundation Infrastructure Deployment
+name: Phase 1 Terraform Foundation Infrastructure Deployment
 on:
   workflow_dispatch:
 
@@ -68,10 +68,6 @@ jobs:
         with:
           terraform_version: latest
 
-      #  List Modules
-      - name: List Module Folders
-        run: ls -l Modules/
-
       # Determine Branch Enviroment &  Backend Variables For Deployment
       - name: Determine Branch Environment Variables
         run: |
@@ -114,9 +110,12 @@ jobs:
           echo "Storage Container Name    : ${{ env.STORAGE_CONTAINER_NAME }}"
           echo "Terraform Deployment State Key       : ${{ env.STATE_KEY_DEPLOYMENT }}"
 
-      # List Modules
-      - name: Modules
-        run: ls -l modules/
+        # List & Confirm Modules
+      - name: List and Confirm Terraform Modules
+        run: |
+          for mod in resource-group network log-analytics key-vault; do
+            [ -d "modules/$mod" ] && echo "Module Found: $mod" || echo "Module Missing: $mod"
+          done
 
       # Terraform Init
       - name: Initialize Terraform
