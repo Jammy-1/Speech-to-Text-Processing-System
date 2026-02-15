@@ -119,7 +119,7 @@ jobs:
 
       # Terraform Apply
       - name: Terraform Apply Backend Deployment
-        working-directory: environments/terraform-backend
+        working-directory: environments/terraform-backend/backend-deployment
         run: terraform apply -auto-approve tfplan-backend
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
