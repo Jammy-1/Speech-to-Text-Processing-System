@@ -1,4 +1,5 @@
 # Speech 
+output "cognitive_account_uai_id" { value = azurerm_user_assigned_identity.cognitive_account_uai.id }
 output "speech_worker_uai_principal_id" { value = azurerm_user_assigned_identity.speech_worker_uai.principal_id }
 
 # Search 

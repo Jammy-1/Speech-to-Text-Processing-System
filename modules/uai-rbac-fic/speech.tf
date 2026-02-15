@@ -1,7 +1,23 @@
 # UAI & RBAC For Speech - modules\cognitive\speech.tf
 
-# Kubernetes - modules\kubernetes\speech.tf
+# Speech Service 
+# UAI - Cognitve Account -  Speech Service
+resource "azurerm_user_assigned_identity" "cognitive_account_uai" {
+  name                = var.uai_name_cognitive_account
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
+}
 
+# RBAC - CA - Speech Service
+resource "azurerm_role_assignment" "cognitive_rbac" {
+  scope                = var.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_user_assigned_identity.cognitive_account_uai.principal_id
+}
+
+
+# Kubernetes - modules\kubernetes\speech.tf
 # UAI Used On K8 Speech Worker
 resource "azurerm_user_assigned_identity" "speech_worker_uai" {
   name                = var.uai_speech_worker_name

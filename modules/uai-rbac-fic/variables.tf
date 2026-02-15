@@ -10,6 +10,7 @@ variable "transcripts_container_id" { type = string }
 
 # Speech
 variable "speech_id" { type = string }
+variable "uai_name_cognitive_account" { type = string }
 variable "uai_speech_worker_name" { type = string }
 
 # Search 
