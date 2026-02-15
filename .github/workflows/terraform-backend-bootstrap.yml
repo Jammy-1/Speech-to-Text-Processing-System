@@ -110,7 +110,7 @@ jobs:
         run: |
           terraform plan \
             -var-file=../../${ENV}/backend.tfvars \
-            -out=tfplan
+            -out=tfplan-backend
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -119,8 +119,8 @@ jobs:
 
       # Terraform Apply
       - name: Terraform Apply Backend Deployment
-        working-directory: environments/backend/bootstrap
-        run: terraform apply -auto-approve tfplan
+        working-directory: environments/terraform-backend
+        run: terraform apply -auto-approve tfplan-backend
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
