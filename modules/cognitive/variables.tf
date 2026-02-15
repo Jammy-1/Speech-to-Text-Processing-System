@@ -5,7 +5,7 @@ variable "tags" { type = map(string) }
 
 # Speech 
 variable "cognitive_account_name" { type = string }
-variable "uai_name_cognitive_account" { type = string }
+variable "cognitive_account_uai_id" { type = string }
 
 # Search
 variable "search_service_name" { type = string }

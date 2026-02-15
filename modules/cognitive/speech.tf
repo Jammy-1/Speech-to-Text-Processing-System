@@ -15,7 +15,7 @@ resource "azurerm_cognitive_account" "speech_service" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.cognitive_account_uai.id]
+    identity_ids = [var.cognitive_account_uai_id]
   }
 
   network_acls {
@@ -26,17 +26,3 @@ resource "azurerm_cognitive_account" "speech_service" {
   }
 }
 
-# UAI - CA -  Speech Service
-resource "azurerm_user_assigned_identity" "cognitive_account_uai" {
-  name                = var.uai_name_cognitive_account
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  tags                = var.tags
-}
-
-# RBAC - CA - Speech Service
-resource "azurerm_role_assignment" "cognitive_rbac" {
-  scope                = var.key_vault_id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_user_assigned_identity.cognitive_account_uai.principal_id
-}
