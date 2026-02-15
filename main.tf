@@ -31,7 +31,8 @@ module "cognitive" {
   tags                = var.tags
 
   # Speech
-  cognitive_account_name = var.cognitive_account_name
+  cognitive_account_name   = var.cognitive_account_name
+  cognitive_account_uai_id = module.uai-rbac-fic.cognitive_account_uai_id
 
   #Search
   search_service_name   = var.search_service_name
@@ -42,8 +43,7 @@ module "cognitive" {
 
   # Access
   key_vault_id = module.key-vault.key_vault_id
-  uai_name_cognitive_account = var.uai_name_cognitive_account
-  depends_on = [module.resource_group]
+  depends_on   = [module.resource_group]
 }
 
 # ACR
@@ -117,8 +117,9 @@ module "uai-rbac-fic" {
   uai_storage_worker_name  = var.uai_storage_worker_name
 
   # Speech
-  speech_id              = module.cognitive.speech_id
-  uai_speech_worker_name = var.uai_speech_worker_name
+  speech_id                  = module.cognitive.speech_id
+  uai_name_cognitive_account = var.uai_name_cognitive_account
+  uai_speech_worker_name     = var.uai_speech_worker_name
 
   # Search
   uai_search_service_name = var.search_service_name
@@ -132,7 +133,7 @@ module "uai-rbac-fic" {
   # Queue
   service_bus_id = module.queue.service_bus_id
 
-  depends_on = [ module.resource_group ]
+  depends_on = [module.resource_group]
 }
 
 # Key Vault
