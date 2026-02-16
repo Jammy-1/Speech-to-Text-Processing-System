@@ -5,7 +5,6 @@ variable "tags" { type = map(string) }
 
 # Key Vault
 variable "key_vault_name" { type = string }
-variable "tenant_id" { type = string }
 
 # Network
 variable "pe_subnet_id" { type = string }

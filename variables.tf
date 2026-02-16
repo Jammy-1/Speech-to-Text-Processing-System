@@ -70,7 +70,6 @@ variable "uai_api_worker_name" { type = string }
 
 # Key Vault
 variable "key_vault_name" { type = string }
-variable "tenant_id" { type = string }
 variable "uai_ci_cd_kv_admin_name" { type = string }
 
 variable "acr_encryption_key_name" { type = string }

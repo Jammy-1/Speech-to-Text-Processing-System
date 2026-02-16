@@ -1,3 +1,5 @@
+data "azurerm_client_config" "current" {}
+
 # Key Vault
 resource "azurerm_key_vault" "key_vault" {
   name                = var.key_vault_name
@@ -8,7 +10,7 @@ resource "azurerm_key_vault" "key_vault" {
   enabled_for_disk_encryption = true
   rbac_authorization_enabled  = true
 
-  tenant_id                  = var.tenant_id
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   purge_protection_enabled   = false
   soft_delete_retention_days = 90

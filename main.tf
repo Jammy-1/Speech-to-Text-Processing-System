@@ -144,7 +144,6 @@ module "key-vault" {
   tags                = var.tags
 
   key_vault_name = var.key_vault_name
-  tenant_id      = var.tenant_id
 
   # ServiceBus
   servicebus_encryption_key_name = var.service_bus_encryption_key_name
