@@ -17,3 +17,9 @@ jobs:
     uses: ./.github/workflows/terraform-format.yml
     with:
       branch: ${{ inputs.branch }}
+
+  terraform-validate:
+    name: Terraform Validate
+    uses: ./.github/workflows/terraform-validate.yml
+    with:
+      branch: ${{ inputs.branch }}
