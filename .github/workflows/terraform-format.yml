@@ -7,6 +7,13 @@ on:
         required: true
         type: string
 
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch To Run Workflow - Leave Empty To Use Current Branch"
+        required: false
+        type: string
+
   pull_request:
     branches:
       - dev
@@ -14,11 +21,12 @@ on:
       - main
 
 jobs:
-  terraform-format-validate:
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_call'
+  terraform-format:
     runs-on: ubuntu-latest
     env:
       TF_LOG: "ERROR"
+      INPUT_BRANCH: ${{ inputs.branch }}
+      DISPATCH_BRANCH: ${{ github.event.inputs.branch }}
 
     outputs:
       env_name: ${{ steps.detect-env.outputs.env }}
@@ -27,21 +35,33 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # Determine Branch
-      - name: Determine Environment Based On Branch
+      # Determine Branch & Environment
+      - name: Determine Branch & Enviroment
         id: detect-env
+        shell: bash
         run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            BRANCH="${{ github.base_ref }}"
+          echo "Event: $GITHUB_EVENT_NAME"
+
+           if [ "$GITHUB_EVENT_NAME" = "workflow_call" ]; then
+            BRANCH="$INPUT_BRANCH"
+
+           elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ -n "$DISPATCH_BRANCH" ]; then
+            BRANCH="$DISPATCH_BRANCH"
+
+          elif [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            BRANCH="$GITHUB_BASE_REF"
+
           else
-            BRANCH="${{ inputs.branch }}"
+            BRANCH="${GITHUB_REF#refs/heads/}"
           fi
+
+          echo "Branch: $BRANCH"
 
           case "$BRANCH" in
             dev) ENV="dev" ;;
             staging) ENV="staging" ;;
             main) ENV="production" ;;
-            *) echo "Invalid branch: $BRANCH"; exit 1 ;;
+            *) echo "Invalid Branch: $BRANCH"; exit 1 ;;
             esac
 
           TFVARS_FILE="environments/${ENV}/${ENV}.tfvars"
