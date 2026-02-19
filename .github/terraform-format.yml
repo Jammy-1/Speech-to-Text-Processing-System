@@ -1,0 +1,63 @@
+name: Terraform Format
+
+on:
+  workflow_call:
+  inputs:
+    branch:
+      required: true
+      type: string
+
+  pull_request:
+    branches:
+      - dev
+      - staging
+      - main
+
+jobs:
+  terraform-format-validate:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_call'
+    runs-on: ubuntu-latest
+    env:
+      TF_LOG: "ERROR"
+
+    outputs:
+      env_name: ${{ steps.detect-env.outputs.env }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      # Determine Branch
+      - name: Determine Environment Based On Branch
+        id: detect-env
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BRANCH="${{ github.base_ref }}"
+          else
+            BRANCH="${{ inputs.branch }}"
+          fi
+
+          case "$BRANCH" in
+            dev) ENV="dev" ;;
+            staging) ENV="staging" ;;
+            main) ENV="production" ;;
+            *) echo "Invalid branch: $BRANCH"; exit 1 ;;
+            esac
+
+          TFVARS_FILE="environments/${ENV}/${ENV}.tfvars"
+
+          echo "ENV=$ENV" >> $GITHUB_ENV
+          echo "TFVARS_FILE=$TFVARS_FILE" >> $GITHUB_ENV
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+
+          echo "Environment: $ENV"
+          echo "Using TFVARS File: $TFVARS_FILE"
+
+        # Modules
+      - name: List Module Folders
+        run: ls -l modules/
+
+        # Format
+      - name: Terraform FMT
+        working-directory: .
+        run: terraform fmt -check -recursive
