@@ -1,0 +1,19 @@
+name: Pipeline Orchestrator
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch To Deploy ( dev | staging | main )"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  terraform-format:
+    name: Terraform Format
+    uses: ./.github/workflows/terraform-format.yml
+    with:
+      branch: ${{ inputs.branch }}
