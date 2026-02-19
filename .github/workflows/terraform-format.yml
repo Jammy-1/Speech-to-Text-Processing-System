@@ -35,6 +35,12 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
+      # Terraform Setup
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
       # Determine Branch & Environment
       - name: Determine Branch & Enviroment
         id: detect-env
