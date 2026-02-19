@@ -41,6 +41,11 @@ jobs:
         with:
           terraform_version: latest
 
+      # Terraform Version
+      - name: Terraform Version
+        working-directory: .
+        run: terraform version
+
       # Determine Branch & Environment
       - name: Determine Branch & Enviroment
         id: detect-env
