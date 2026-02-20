@@ -118,12 +118,12 @@ jobs:
 
           rule "terraform_required_providers" {
            enabled  = true
-           severity = "ERROR"
+            level = "ERROR"
           }
 
           rule "terraform_unused_declarations" {
            enabled  = true
-           severity = "WARNING"
+           level = "WARNING"
           }
           EOF
 
