@@ -99,6 +99,7 @@ jobs:
         with:
           scan-type: "fs"
           input: "modules/"
+          tf-vars: "${{ env.TFVARS_FILE }}"
           format: "table"
           hide-progress: false
           severity: "CRITICAL,HIGH"
