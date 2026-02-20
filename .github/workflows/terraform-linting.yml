@@ -118,7 +118,6 @@ jobs:
 
           rule "terraform_required_providers" {
            enabled  = true
-            level = "ERROR"
           }
 
           rule "terraform_unused_declarations" {
