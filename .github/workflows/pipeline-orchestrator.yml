@@ -12,14 +12,26 @@ permissions:
   contents: read
 
 jobs:
+  # Terraform Format
   terraform-format:
     name: Terraform Format
     uses: ./.github/workflows/terraform-format.yml
     with:
       branch: ${{ inputs.branch }}
 
+  # Terraform Validate
   terraform-validate:
     name: Terraform Validate
     uses: ./.github/workflows/terraform-validate.yml
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Terraform Linting
+  terraform-linting:
+    name: Terraform Linting
+    needs:
+      - terraform-format
+      - terraform-validate
+    uses: ./.github/workflows/terraform-linting.yml
     with:
       branch: ${{ inputs.branch }}
