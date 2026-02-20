@@ -29,7 +29,7 @@ variable "uai_speech_worker_name" { type = string }
 variable "log_workspace_name" { type = string }
 
 # ACR
-variable "acr_name" {}
+variable "acr_name" { type = string }
 variable "uai_acr_encryption_name" { type = string }
 variable "uai_ci_cd_acr_name" { type = string }
 
@@ -81,7 +81,7 @@ variable "speech_key_name" { type = string }
 variable "search_key_name" { type = string }
 
 # Vnet
-variable "vnet_name" {}
+variable "vnet_name" { type = string }
 
 # Subnet
 variable "subnet_name_aks" { type = string }
