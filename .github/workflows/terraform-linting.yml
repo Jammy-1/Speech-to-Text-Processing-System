@@ -1,0 +1,146 @@
+name: Terraform Lint
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch To Run Workflow - Leave Empty To Use Current Branch"
+        required: false
+        type: string
+
+  pull_request:
+    branches:
+      - dev
+      - staging
+      - main
+
+jobs:
+  terraform-linting:
+    runs-on: ubuntu-latest
+    env:
+      TF_LOG: "ERROR"
+      INPUT_BRANCH: ${{ inputs.branch }}
+      DISPATCH_BRANCH: ${{ github.event.inputs.branch }}
+
+    outputs:
+      env_name: ${{ steps.detect-env.outputs.env }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      # Terraform Setup
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      # Terraform Version
+      - name: Terraform Version
+        working-directory: .
+        run: terraform version
+
+      # Determine Branch & Environment
+      - name: Determine Branch & Enviroment
+        id: detect-env
+        shell: bash
+        run: |
+          echo "Event: $GITHUB_EVENT_NAME"
+
+           if [ "$GITHUB_EVENT_NAME" = "workflow_call" ]; then
+            BRANCH="$INPUT_BRANCH"
+
+           elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ -n "$DISPATCH_BRANCH" ]; then
+            BRANCH="$DISPATCH_BRANCH"
+
+          elif [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            BRANCH="$GITHUB_BASE_REF"
+
+          else
+            BRANCH="${GITHUB_REF#refs/heads/}"
+          fi
+
+          echo "Branch: $BRANCH"
+
+          case "$BRANCH" in
+            dev) ENV="dev" ;;
+            staging) ENV="staging" ;;
+            main) ENV="production" ;;
+            *) echo "Invalid Branch: $BRANCH"; exit 1 ;;
+            esac
+
+          TFVARS_FILE="environments/${ENV}/${ENV}.tfvars"
+
+          echo "ENV=$ENV" >> $GITHUB_ENV
+          echo "TFVARS_FILE=$TFVARS_FILE" >> $GITHUB_ENV
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+
+          echo "Environment: $ENV"
+          echo "Using TFVARS File: $TFVARS_FILE"
+
+        # Modules
+      - name: List Module Folders
+        run: ls -l modules/
+
+        # Initialize Terraform Without Backend
+      - name: Initialize Terraform
+        working-directory: .
+        run: terraform init -backend=false
+
+        # Setup TFLint
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v6
+
+      # TFLint Configuration
+      - name: TFLint Configuration
+        run: |
+          config {
+          format = "compact"
+          module = true
+          }
+
+           plugin "azurerm" {
+           enabled = true
+           source  = "github.com/terraform-linters/tflint-ruleset-azurerm"
+           version = "0.27.0"
+           }
+
+           rule "terraform_deprecated_interpolation" {
+           enabled = true
+           level   = "WARNING"
+           }
+
+           rule "terraform_required_providers" {
+           enabled = true 
+           level = "ERROR"
+           }
+
+           rule "terraform_unused_declarations" {
+           enabled = true
+           level   = "WARNING"
+           }
+           EOF
+
+        # Initialize TF Init
+      - name: Initialize TFLint
+        working-directory: .
+        run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+        # TF Lint Version
+      - name: Show version
+        run: tflint --version
+
+        # Run TFLint
+      - name: Run TFLint
+        run: |
+          echo "Running TFLint..."
+          tflint --init
+          tflint --format compact
