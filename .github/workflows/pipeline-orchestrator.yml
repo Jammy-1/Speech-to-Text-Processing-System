@@ -35,3 +35,11 @@ jobs:
     uses: ./.github/workflows/terraform-linting.yml
     with:
       branch: ${{ inputs.branch }}
+
+  # Security - Checkov
+  Security-Checkov:
+    name: Checkov
+    needs: terraform-linting
+    uses: ./.github/workflows/checkov.yml
+    with:
+      branch: ${{ inputs.branch }}
