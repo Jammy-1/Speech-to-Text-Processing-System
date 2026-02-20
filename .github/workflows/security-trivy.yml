@@ -97,7 +97,7 @@ jobs:
       - name: Trivy Scan
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          scan-type: "fs"
+          scan-type: "config"
           input: "modules/"
           tf-vars: "${{ env.TFVARS_FILE }}"
           format: "table"
