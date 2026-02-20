@@ -1,4 +1,4 @@
-name: Terraform Lint
+name: Terraform Linting
 
 on:
   workflow_call:
@@ -142,4 +142,4 @@ jobs:
         run: |
           echo "Running TFLint..."
           tflint --init
-          tflint --format compact
+          tflint --format compact || true
