@@ -104,6 +104,7 @@ jobs:
           config {
           format = "compact"
           module = true
+          recursive = true
           }
 
            plugin "azurerm" {
@@ -114,17 +115,17 @@ jobs:
 
            rule "terraform_deprecated_interpolation" {
            enabled = true
-           level   = "WARNING"
+           severity = "WARNING"
            }
 
            rule "terraform_required_providers" {
            enabled = true 
-           level = "ERROR"
+           severity = "ERROR"
            }
 
            rule "terraform_unused_declarations" {
            enabled = true
-           level   = "WARNING"
+           severity   = "WARNING"
            }
            EOF
 
