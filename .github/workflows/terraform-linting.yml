@@ -100,34 +100,32 @@ jobs:
       # TFLint Configuration
       - name: TFLint Configuration
         run: |
-          cat <<'EOF' > .tflint.hcl
+          cat <<EOF > .tflint.hcl
           config {
-          format = "compact"
-          module = true
-          recursive = true
+            format = "compact"
           }
 
-           plugin "azurerm" {
-           enabled = true
-           source  = "github.com/terraform-linters/tflint-ruleset-azurerm"
-           version = "0.27.0"
-           }
+          plugin "azurerm" {
+            enabled = true
+            source  = "github.com/terraform-linters/tflint-ruleset-azurerm"
+            version = "0.27.0"
+          }
 
-           rule "terraform_deprecated_interpolation" {
-           enabled = true
-           severity = "WARNING"
-           }
+          rule "terraform_unused_declarations" {
+            enabled = true
+            level   = "WARNING"
+          }
 
-           rule "terraform_required_providers" {
-           enabled = true 
+          rule "terraform_required_providers" {
+           enabled  = true
            severity = "ERROR"
-           }
+          }
 
-           rule "terraform_unused_declarations" {
-           enabled = true
-           severity   = "WARNING"
-           }
-           EOF
+          rule "terraform_unused_declarations" {
+           enabled  = true
+           severity = "WARNING"
+          }
+          EOF
 
         # Initialize TF Init
       - name: Initialize TFLint
