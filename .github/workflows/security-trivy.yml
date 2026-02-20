@@ -96,9 +96,16 @@ jobs:
         # Trivy Setup
       - name: Setup Trivy
         uses: aquasecurity/trivy-action@0.33.1
+        with:
+          version: latest
 
         # Trivy Scan
       - name: Trivy Scan
-        run: |
-          echo "Scanning For Security Issues..."
-          trivy iac --input modules/ --recursive --format table --severity HIGH,CRITICAL --exit-code 1
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: "fs"
+          input: "modules/"
+          format: "table"
+          hide-progress: false
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
