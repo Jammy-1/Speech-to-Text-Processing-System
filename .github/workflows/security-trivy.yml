@@ -93,12 +93,6 @@ jobs:
         working-directory: .
         run: terraform init -backend=false
 
-        # Trivy Setup
-      - name: Setup Trivy
-        uses: aquasecurity/trivy-action@0.33.1
-        with:
-          version: latest
-
         # Trivy Scan
       - name: Trivy Scan
         uses: aquasecurity/trivy-action@0.33.1
