@@ -14,21 +14,21 @@ permissions:
 jobs:
   # Terraform Format
   terraform-format:
-    name: Terraform Format
+    name: Terraform
     uses: ./.github/workflows/terraform-format.yml
     with:
       branch: ${{ inputs.branch }}
 
   # Terraform Validate
   terraform-validate:
-    name: Terraform Validate
+    name: Terraform
     uses: ./.github/workflows/terraform-validate.yml
     with:
       branch: ${{ inputs.branch }}
 
   # Terraform Linting
   terraform-linting:
-    name: Terraform Linting
+    name: Terraform
     needs:
       - terraform-format
       - terraform-validate
@@ -57,5 +57,16 @@ jobs:
     name: Security
     needs: terraform-linting
     uses: ./.github/workflows/security-trivy-secrets.yml
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Terraform Plan
+  terraform-plan:
+    name: Terraform
+    needs:
+      - Security-Checkov
+      - Security-Trivy-IAC
+      - Security-Trivy-Secrets
+    uses: ./.github/workflows/terraform-validate.yml
     with:
       branch: ${{ inputs.branch }}
