@@ -77,6 +77,12 @@ jobs:
       - name: List Module Folders
         run: ls -l modules/
 
+        # Show Terraform Files
+      - name: Terraform Files
+        run: |
+          echo "All Terraform Files:"
+          find . -type f -name "*.tf" | sed 's/^/ - /'
+
         # Trivy Scan
       - name: Trivy IAC Scan - Root Infra
         uses: aquasecurity/trivy-action@0.33.1
@@ -89,3 +95,13 @@ jobs:
           hide-progress: false
           severity: CRITICAL,HIGH
           exit-code: "1"
+
+        # Debug Scan
+      - name: Trivy IaC Debug Scan
+        env:
+          TRIVY_DEBUG: true
+          TRIVY_SEVERITY: CRITICAL,HIGH
+          TRIVY_TF_VARS: ${{ env.TFVARS_FILE }}
+        run: |
+          echo "Running Trivy Debug"
+          trivy config . --skip-dirs environments/terraform-backend
