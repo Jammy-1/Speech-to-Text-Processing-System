@@ -1,0 +1,230 @@
+name: Terraform - Remote Backend Bootstrap
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+    secrets:
+      AZURE_CLIENT_ID:
+      AZURE_CLIENT_SECRET:
+      AZURE_SUBSCRIPTION_ID:
+      AZURE_TENANT_ID:
+
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch To Run Workflow - Leave Empty For Current Branch"
+        required: false
+        type: string
+
+  pull_request:
+    branches:
+      - dev
+      - staging
+      - main
+    paths:
+      - modules/**
+      - environments/dev/**
+      - environments/staging/**
+      - environments/production/**
+      - environments/terraform-backend/**
+      - main.tf
+      - variables.tf
+
+jobs:
+  Remote-Backend-Bootstrap:
+    runs-on: ubuntu-latest
+    env:
+      TF_LOG: "ERROR"
+      INPUT_BRANCH: ${{ inputs.branch }}
+      DISPATCH_BRANCH: ${{ github.event.inputs.branch }}
+
+    outputs:
+      env_name: ${{ steps.detect-env.outputs.env }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      # Determine Branch & Environment
+      - name: Determine Branch & Enviroment
+        id: detect-env
+        shell: bash
+        run: |
+          echo "Event: $GITHUB_EVENT_NAME"
+
+           if [ "$GITHUB_EVENT_NAME" = "workflow_call" ]; then
+            BRANCH="$INPUT_BRANCH"
+
+           elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ -n "$DISPATCH_BRANCH" ]; then
+            BRANCH="$DISPATCH_BRANCH"
+
+          elif [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            BRANCH="$GITHUB_BASE_REF"
+
+          else
+            BRANCH="${GITHUB_REF#refs/heads/}"
+          fi
+
+          echo "Branch: $BRANCH"
+
+          case "$BRANCH" in
+            dev) ENV="dev" ;;
+            staging) ENV="staging" ;;
+            main) ENV="production" ;;
+            *) echo "Invalid Branch: $BRANCH"; exit 1 ;;
+            esac
+
+          TFVARS_FILE="environments/${ENV}/backend.tfvars"
+
+          echo "ENV=$ENV" >> $GITHUB_ENV
+          echo "TFVARS_FILE=$TFVARS_FILE" >> $GITHUB_ENV
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+
+          echo "Environment: $ENV"
+          echo "Using TFVARS File: $TFVARS_FILE"
+
+        # Terraform Backend Folders & Files
+      - name: Terraform Backend Folders & Files
+        run: |
+          echo "Terraform Backend Folders & Files:"
+          for dir in environments/terraform-backend/*; do
+            if [ -d "$dir" ]; then
+              echo "Folder: $dir"
+              ls -1 "$dir"
+            fi
+          done
+
+      # Determine Backend Variables
+      - name: Determine Backend Variables
+        run: |
+          BACKEND_FILE="${TFVARS_FILE}"
+
+          if [ ! -f "$BACKEND_FILE" ]; then
+           echo "Backend TFVARS File Not Found: $BACKEND_FILE"
+           exit 1
+          fi
+
+           RG=$(grep -E '^state_resource_group_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
+           SA=$(grep -E '^state_storage_account_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
+           CONTAINER=$(grep -E '^state_storage_container_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
+           KEY=$(grep -E '^state_key_backend' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
+
+           RG="${RG//$'\r'/}"
+           SA="${SA//$'\r'/}"
+           CONTAINER="${CONTAINER//$'\r'/}"
+           KEY="${KEY//$'\r'/}"
+
+           echo "RG_NAME=$RG" >> $GITHUB_ENV
+           echo "STORAGE_ACCOUNT_NAME=$SA" >> $GITHUB_ENV
+           echo "STORAGE_CONTAINER_NAME=$CONTAINER" >> $GITHUB_ENV
+           echo "STATE_KEY_BACKEND=$KEY" >> $GITHUB_ENV
+
+        # Confirm Backend Variables
+      - name: Confirm Backend Variables
+        run: |
+          echo "Resource Group Name       : ${{ env.RG_NAME }}"
+          echo "Storage Account Name      : ${{ env.STORAGE_ACCOUNT_NAME }}"
+          echo "Storage Container Name    : ${{ env.STORAGE_CONTAINER_NAME }}"
+          echo "Terraform Backend State Key : ${{ env.STATE_KEY_BACKEND }}"
+
+      # Clear Terraform Cahce
+      - name: Clear Cache
+        run: |
+          echo "Cleaning Cache..."
+
+          rm -rf .terraform .terraform.lock.hcl
+
+          rm -rf environments/${ENV}/.terraform
+          rm -f environments/${ENV}/.terraform.lock.hcl
+
+          rm -rf environments/terraform-backend/backend-deployment/.terraform
+          rm -f environments/terraform-backend/backend-migration/.terraform.lock.hcl
+
+          echo "Cleanup Complete"
+
+      # Terraform Setup
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
+
+      # Terraform Version
+      - name: Terraform Version
+        run: terraform version
+
+        # Terraform Init
+      - name: Initialize Terraform
+        working-directory: environments/terraform-backend/backend-deployment
+        run: terraform init
+
+      # Terraform Plan - Creates SG & RG
+      - name: Terraform Plan
+        working-directory: environments/terraform-backend/backend-deployment
+        run: |
+          terraform plan \
+            -var-file=../../${ENV}/backend.tfvars \
+            -out=tfplan-backend
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      # Terraform Apply
+      - name: Terraform Apply
+        working-directory: environments/terraform-backend/backend-deployment
+        run: terraform apply -auto-approve tfplan-backend
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      # Wait For RBAC Roles To Assign
+      - name: Wait for RBAC Roles To Assign
+        run: sleep 15
+
+      # Confirm State File - Backend Deployment Folder
+      - name: Confirm Local State File
+        run: |
+          STATE_FILE="environments/terraform-backend/backend-deployment/terraform.tfstate"
+          if [ ! -f "$STATE_FILE" ]; then
+            echo "Terraform State - Missing!"
+            exit 1
+          fi
+          echo "Found Terraform State - $STATE_FILE"
+
+        # Copy Local State Into Migration Folder
+      - name: Copy State Into Migraion Folder
+        run: |
+          cp environments/terraform-backend/backend-deployment/terraform.tfstate \
+            environments/terraform-backend/backend-migration/
+
+        # Confirm State File In Migration Folder
+      - name: Confirm State In Migration Folder
+        run: |
+          STATE_FILE=environments/terraform-backend/backend-migration/terraform.tfstate
+          if [ ! -f "$STATE_FILE" ]; then
+            echo "Terraform State - Missing!"
+            exit 1
+          fi
+          echo "Found Terraform State - $STATE_FILE"
+
+        # Terraform Init - Migration Folder - Migrate State
+      - name: Initialize Terraform & Migrate Local State
+        working-directory: environments/terraform-backend/backend-migration
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        run: |
+          terraform init \
+          -backend-config="resource_group_name=${{ env.RG_NAME }}" \
+          -backend-config="storage_account_name=${{ env.STORAGE_ACCOUNT_NAME }}" \
+          -backend-config="container_name=${{ env.STORAGE_CONTAINER_NAME }}" \
+          -backend-config="key=${{ env.STATE_KEY_BACKEND }}" \
+          -force-copy
