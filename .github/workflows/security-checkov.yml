@@ -19,9 +19,17 @@ on:
       - dev
       - staging
       - main
+    paths:
+      - modules/**
+      - environments/dev/**
+      - environments/staging/**
+      - environments/production/**
+      - environments/terraform-backend/**
+      - main.tf
+      - variables.tf
 
 jobs:
-  checkov:
+  Checkov:
     runs-on: ubuntu-latest
     env:
       TF_LOG: "ERROR"
