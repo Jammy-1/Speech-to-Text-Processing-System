@@ -75,3 +75,11 @@ jobs:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     with:
       branch: ${{ inputs.branch }}
+
+  # Terraform Remote Backend Checks
+  terraform-remote-backend-checks:
+    name: Terraform
+    needs: terraform-plan
+    uses: ./.github/workflows/terraform-remote-backend-check.yml
+    with:
+      branch: ${{ inputs.branch }}
