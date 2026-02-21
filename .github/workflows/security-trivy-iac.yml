@@ -35,11 +35,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # Terraform Version
-      - name: Terraform Version
-        working-directory: .
-        run: terraform version
-
       # Determine Branch & Environment
       - name: Determine Branch & Enviroment
         id: detect-env
