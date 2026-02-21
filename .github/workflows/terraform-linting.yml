@@ -29,7 +29,7 @@ on:
       - variables.tf
 
 jobs:
-  terraform-linting:
+  Linting:
     runs-on: ubuntu-latest
     env:
       TF_LOG: "ERROR"
