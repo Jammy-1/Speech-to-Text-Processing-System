@@ -88,3 +88,17 @@ jobs:
       AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+  # Terraform Remote Backend Bootstrap
+  terraform-remote-backend-bootstrap:
+    name: Terraform
+    needs: terraform-remote-backend-checks
+    if: ${{ needs.terraform-remote-backend-checks.outputs.backend_exists == 'false' }}
+    uses: ./.github/workflows/terraform-remote-backend-bootstrap.yml
+    with:
+      branch: ${{ inputs.branch }}
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
