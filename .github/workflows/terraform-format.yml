@@ -1,4 +1,4 @@
-name: Terraform Format
+name: Terraform - Format
 
 on:
   workflow_call:
