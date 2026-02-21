@@ -38,8 +38,16 @@ jobs:
 
   # Security - Checkov
   Security-Checkov:
-    name: Security - Checkov
+    name: Security
     needs: terraform-linting
     uses: ./.github/workflows/security-checkov.yml
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Security - Trivy IAC
+  Security-Trivy-IAC:
+    name: Security
+    needs: terraform-linting
+    uses: ./.github/workflows/security-trivy-iac.yml
     with:
       branch: ${{ inputs.branch }}
