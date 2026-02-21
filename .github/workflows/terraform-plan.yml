@@ -91,11 +91,12 @@ jobs:
           echo "All Terraform Files:"
           find . -type f -name "*.tf" | sed 's/^/ - /'
 
-        # Remove Backend Block File
-      - name: Remove Backend.tf
+        # Remove Backend Block File - Root & Migration Folder
+      - name: Remove Backend Blocks
         run: |
-          rm -f backend.tf
-          echo "Backend.tf Removed Successfully"
+          rm -f backend_block.tf
+          rm -f environments/terraform-backend/backend-migration/backend_block.tf
+          echo "Removed Backend.tf Successfully"
 
         # Clear Cahce
       - name: Clear Cache
