@@ -34,7 +34,7 @@ on:
       - variables.tf
 
 jobs:
-  Remote-BackendCheck:
+  Remote-Backend-Check:
     runs-on: ubuntu-latest
     env:
       TF_LOG: "ERROR"
@@ -142,13 +142,15 @@ jobs:
           echo "Container : $STORAGE_CONTAINER_NAME"
           echo "Backend State Key : $STATE_KEY_BACKEND"
 
+          backend_exists=true
+
           # Resource Group
           echo "Checking Resource Group..."
           if ! az group show \
            --name "$RG_NAME" \
            --output none; then
               echo "Skipping Further Checks.."
-              exit 1
+              backend_exists=false
           else
             echo "Resource Group Exists"
 
@@ -159,7 +161,7 @@ jobs:
               --resource-group "$RG_NAME" \
               --output none; then
                 echo "Skipping Further Checks.."
-                exit 1
+                backend_exists=false
             else
               echo "Storage Account Exists"
             fi
@@ -172,7 +174,7 @@ jobs:
               --auth-mode login \
               --output none; then
                 echo "Skipping Further Checks.."
-                exit 1
+                backend_exists=false
               else
                 echo "Container Exists"
             fi  
@@ -190,13 +192,13 @@ jobs:
 
             if [[ "$BLOB_EXISTS" != "true" ]]; then
               echo "Skipping Further Checks.."
-              exit 1
+              backend_exists=false
             else
               echo "Backend Exists"
             fi
           fi
 
-           # Backend Exists If Reached This Step
-           echo "backend_exists=true" >> $GITHUB_OUTPUT
-           echo "backend_exists=true" >> $GITHUB_ENV
-           echo "Backend Exists: true"
+           # Backend Exists Conditions Output
+          echo "backend_exists=$backend_exists" >> $GITHUB_OUTPUT
+          echo "backend_exists=$backend_exists" >> $GITHUB_ENV
+          echo "Backend Exists: $backend_exists"
