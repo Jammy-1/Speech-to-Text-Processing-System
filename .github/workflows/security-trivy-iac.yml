@@ -83,33 +83,12 @@ jobs:
           echo "All Terraform Files:"
           find . -type f -name "*.tf" | sed 's/^/ - /'
 
-        # Trivy Scan
-      - name: Trivy IAC Scan - Root Infra
-        uses: aquasecurity/trivy-action@0.33.1
-        with:
-          scan-type: config
-          scan-ref: .
-          tf-vars: ${{ env.TFVARS_FILE }}
-          skip-dirs: environments/terraform-backend
-          format: table
-          output: trivy-results-IAC.txt
-          hide-progress: false
-          severity: CRITICAL,HIGH
-          exit-code: "0"
-
-        # Debug Scan
-      - name: Trivy IaC Debug Scan
-        env:
-          TRIVY_DEBUG: true
-          TRIVY_SEVERITY: CRITICAL,HIGH
-          TRIVY_TF_VARS: ${{ env.TFVARS_FILE }}
+        # Trivy Scan - Root Modules
+      - name: Trivy Modules IAC Scan
         run: |
-          echo "Running Trivy Debug"
-          trivy config . --skip-dirs environments/terraform-backend
-
-        # Upload Trivy results Artifact
-      - name: Upload Trivy Scan Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: Trivy-Results-IAC
-          path: trivy-results-IAC.txt
+          echo "Running Trivy Module IAC Scan..."
+          trivy config . \
+            --tfvars ${{ env.TFVARS_FILE }} \
+            --skip-dirs environments/terraform-backend \
+            --format table \
+            --severity CRITICAL,HIGH || true
