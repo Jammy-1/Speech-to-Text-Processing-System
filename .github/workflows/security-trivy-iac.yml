@@ -109,7 +109,7 @@ jobs:
 
         # Upload Trivy results Artifact
       - name: Upload Trivy Scan Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Trivy-Results-IAC
           path: trivy-results-IAC.txt
