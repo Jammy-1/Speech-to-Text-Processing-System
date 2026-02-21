@@ -67,6 +67,15 @@ jobs:
       - Security-Checkov
       - Security-Trivy-IAC
       - Security-Trivy-Secrets
-    uses: ./.github/workflows/terraform-validate.yml
+    uses: ./.github/workflows/terraform-plan.yml
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Terraform Remote Backend Check
+  terraform-remote-backend-check:
+    name: Terraform
+    needs:
+      - terraform-plan
+    uses: ./.github/workflows/terraform-remote-backend-check.yml
     with:
       branch: ${{ inputs.branch }}
