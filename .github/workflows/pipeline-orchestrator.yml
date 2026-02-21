@@ -51,3 +51,11 @@ jobs:
     uses: ./.github/workflows/security-trivy-iac.yml
     with:
       branch: ${{ inputs.branch }}
+
+  # Security - Trivy Secrets
+  Security-Trivy-Secrets:
+    name: Security
+    needs: terraform-linting
+    uses: ./.github/workflows/security-trivy-secrets.yml
+    with:
+      branch: ${{ inputs.branch }}
