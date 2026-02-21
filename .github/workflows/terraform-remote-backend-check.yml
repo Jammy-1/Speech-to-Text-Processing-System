@@ -13,8 +13,8 @@ on:
       AZURE_TENANT_ID:
     outputs:
       backend_exists:
-        description: "Output Backend Exists - True / False"
-        value: ${{ jobs.terraform-remote-backend-checks.outputs.backend_exists }}
+        description: "Output Backend Status - True / False"
+        value: ${{ jobs.Remote-Backend-Check.outputs.backend_exists }}
 
   workflow_dispatch:
     inputs:
