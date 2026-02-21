@@ -1,4 +1,4 @@
-name: Terraform Linting
+name: Terraform - Linting
 
 on:
   workflow_call:
