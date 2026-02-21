@@ -1,4 +1,4 @@
-name: Terraform Remote Backend Check
+name: Terraform - Remote Backend Check
 
 on:
   workflow_call:
@@ -137,16 +137,14 @@ jobs:
           echo "Container : $STORAGE_CONTAINER_NAME"
           echo "Backend State Key : $STATE_KEY_BACKEND"
 
-          backend_exists=true
-
           # Resource Group
           echo "Checking Resource Group..."
           if ! az group show \
            --name "$RG_NAME" \
            --output none; then
               echo "Resource Group '$RG_NAME' Missing"
-              exit 1
               echo "Skipping Further Checks.."
+              exit 1
           else
             echo "Resource Group Exists"
 
@@ -157,6 +155,7 @@ jobs:
               --resource-group "$RG_NAME" \
               --output none; then
                 echo "Storage Account Missing"
+                echo "Skipping Further Checks.."
                 exit 1
             else
               echo "Storage Account Exists"
@@ -170,6 +169,7 @@ jobs:
               --auth-mode login \
               --output none; then
                 echo "Container Missing"
+                echo "Skipping Further Checks.."
                 exit 1
               else
                 echo "Container Exists"
@@ -188,10 +188,12 @@ jobs:
 
             if [[ "$BLOB_EXISTS" != "true" ]]; then
               echo "State Key Missing"
+              echo "Skipping Further Checks.."
               exit 1
             else
               echo "Backend Exists"
             fi
+          fi
 
            # Backend Exists If Reached This Step
            echo "backend_exists=true" >> $GITHUB_OUTPUT
