@@ -1,4 +1,4 @@
-name: Security - Trivy
+name: Security - Trivy IAC
 
 on:
   workflow_call:
@@ -21,7 +21,7 @@ on:
       - main
 
 jobs:
-  Trivy:
+  Trivy-IAC:
     runs-on: ubuntu-latest
     env:
       TF_LOG: "ERROR"
@@ -94,13 +94,13 @@ jobs:
         run: terraform init -backend=false
 
         # Trivy Scan
-      - name: Trivy Scan
+      - name: Trivy IAC Scan
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          scan-type: "config"
-          input: "modules/"
-          tf-vars: "${{ env.TFVARS_FILE }}"
-          format: "table"
+          scan-type: config
+          scan-ref: .
+          tf-vars: ${{ env.TFVARS_FILE }}
+          format: table
           hide-progress: false
-          severity: "CRITICAL,HIGH"
+          severity: CRITICAL,HIGH
           exit-code: "1"
