@@ -43,6 +43,7 @@ jobs:
 
     outputs:
       env_name: ${{ steps.detect-env.outputs.env }}
+      backend_exists: ${{ steps.set-backend.outputs.backend_exists }}
 
     steps:
       - name: Checkout Repo
@@ -200,5 +201,4 @@ jobs:
 
            # Backend Exists Conditions Output
           echo "backend_exists=$backend_exists" >> $GITHUB_OUTPUT
-          echo "backend_exists=$backend_exists" >> $GITHUB_ENV
           echo "Backend Exists: $backend_exists"
