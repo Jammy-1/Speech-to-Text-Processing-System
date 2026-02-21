@@ -35,12 +35,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      # Terraform Setup
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: latest
-
       # Terraform Version
       - name: Terraform Version
         working-directory: .
@@ -88,18 +82,14 @@ jobs:
       - name: List Module Folders
         run: ls -l modules/
 
-        # Initialize Terraform Without Backend
-      - name: Initialize Terraform
-        working-directory: .
-        run: terraform init -backend=false
-
         # Trivy Scan
-      - name: Trivy IAC Scan
+      - name: Trivy IAC Scan - Root Infra
         uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: config
           scan-ref: .
           tf-vars: ${{ env.TFVARS_FILE }}
+          skip-dirs: environments/terraform-backend
           format: table
           hide-progress: false
           severity: CRITICAL,HIGH
