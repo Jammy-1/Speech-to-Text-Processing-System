@@ -86,9 +86,12 @@ jobs:
         # Trivy Scan - Root Modules
       - name: Trivy Modules IAC Scan
         run: |
+          echo "Installing Trivy..."
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+
           echo "Running Trivy Module IAC Scan..."
-          trivy config . \
-            --tfvars ${{ env.TFVARS_FILE }} \
+          ./bin/trivy config . \
+            --tf-vars ${{ env.TFVARS_FILE }} \
             --skip-dirs environments/terraform-backend \
             --format table \
             --severity CRITICAL,HIGH || true
