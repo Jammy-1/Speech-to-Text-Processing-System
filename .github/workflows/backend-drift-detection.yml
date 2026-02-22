@@ -170,11 +170,13 @@ jobs:
         id: drift-plan
         run: |
           echo "Running Terraform Drift Detection..."
+          set +e
           terraform plan \
-          -var-file=../../${ENV}/backend.tfvars \
-          -detailed-exitcode \
-          -out=tfplan
+            -var-file=../../${ENV}/backend.tfvars \
+            -detailed-exitcode \
+            -out=tfplancheck
           exit_code=$?
+          set +e
 
           echo "Terraform exit code: $exit_code"
           echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
