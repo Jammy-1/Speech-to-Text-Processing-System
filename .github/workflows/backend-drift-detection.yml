@@ -1,4 +1,4 @@
-name: Backend - Drift Detection Backend
+name: Backend - Drift Detection
 
 on:
   workflow_call:
@@ -125,6 +125,13 @@ jobs:
 
           echo "Cleanup Complete"
 
+      # Copy Backend Block From Migration Folder
+      - name: Copy Backend Block
+        working-directory: environments/terraform-backend/backend-deployment
+        run: |
+          echo "Copying backend_block.tf & Moving To Backend Deployment Folder...s"
+          cp ../backend-migration/backend_block.tf .
+
         # Terraform Setup
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -133,12 +140,12 @@ jobs:
 
         # Terraform Version
       - name: Terraform Version
-        working-directory: .
+        working-directory: environments/terraform-backend/backend-deployment
         run: terraform version
 
         # Initialize Terraform Withs Backend
       - name: Initialize Terraform
-        working-directory: .
+        working-directory: environments/terraform-backend/backend-deployment
         run: |
           echo "Initializing Terraform Backend..."
           terraform init \
