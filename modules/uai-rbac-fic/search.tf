@@ -49,7 +49,6 @@ resource "azurerm_role_assignment" "rbac_search_worker_kv_access" {
 # FIC - Search Worker
 resource "azurerm_federated_identity_credential" "search_worker_fic" {
   name                = "search-worker-fic"
-  resource_group_name = var.resource_group_name
   parent_id           = azurerm_user_assigned_identity.search_worker_uai.id
   issuer              = var.aks_oidc
   subject             = "system:serviceaccount:search-stt:search-worker-sa"

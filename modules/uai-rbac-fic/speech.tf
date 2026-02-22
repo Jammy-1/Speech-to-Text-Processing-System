@@ -49,7 +49,6 @@ resource "azurerm_role_assignment" "rbac_cognitive_speech_worker" {
 # FIC - Speech Worker 
 resource "azurerm_federated_identity_credential" "fic_speech_worker" {
   name                = "speech-worker-fic"
-  resource_group_name = var.resource_group_name
   parent_id           = azurerm_user_assigned_identity.speech_worker_uai.id
   issuer              = var.aks_oidc
   subject             = "system:serviceaccount:speech-stt:speech-worker-sa"
@@ -57,3 +56,4 @@ resource "azurerm_federated_identity_credential" "fic_speech_worker" {
 
   depends_on = [azurerm_user_assigned_identity.speech_worker_uai]
 }
+
