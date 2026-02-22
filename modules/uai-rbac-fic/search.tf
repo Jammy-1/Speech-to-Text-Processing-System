@@ -48,11 +48,11 @@ resource "azurerm_role_assignment" "rbac_search_worker_kv_access" {
 
 # FIC - Search Worker
 resource "azurerm_federated_identity_credential" "search_worker_fic" {
-  name                = "search-worker-fic"
-  parent_id           = azurerm_user_assigned_identity.search_worker_uai.id
-  issuer              = var.aks_oidc
-  subject             = "system:serviceaccount:search-stt:search-worker-sa"
-  audience            = ["api://AzureADTokenExchange"]
+  name      = "search-worker-fic"
+  parent_id = azurerm_user_assigned_identity.search_worker_uai.id
+  issuer    = var.aks_oidc
+  subject   = "system:serviceaccount:search-stt:search-worker-sa"
+  audience  = ["api://AzureADTokenExchange"]
 
   depends_on = [azurerm_user_assigned_identity.search_worker_uai]
 }
