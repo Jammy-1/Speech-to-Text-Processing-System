@@ -1,4 +1,4 @@
-name: Terraform - Drift Detection Deployment
+name: Terraform - Remote Backend Bootstrap
 
 on:
   workflow_call:
@@ -19,11 +19,8 @@ on:
         required: false
         type: string
 
-  schedule:
-    - cron: "0 3 * * *"
-
 jobs:
-  Drift-Detection:
+  Remote-Backend-Bootstrap:
     runs-on: ubuntu-latest
     env:
       TF_LOG: "ERROR"
@@ -32,8 +29,6 @@ jobs:
 
     outputs:
       env_name: ${{ steps.detect-env.outputs.env }}
-      drift_status: ${{ steps.drift-plan.outputs.drift_status }}
-      drift_exit_code: ${{ steps.drift-plan.outputs.exit_code }}
 
     steps:
       - name: Checkout Repo
@@ -101,7 +96,7 @@ jobs:
            RG=$(grep -E '^state_resource_group_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
            SA=$(grep -E '^state_storage_account_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
            CONTAINER=$(grep -E '^state_storage_container_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
-           KEY=$(grep -E '^state_key_deployment' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
+           KEY=$(grep -E '^state_key_backend' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
 
            RG="${RG//$'\r'/}"
            SA="${SA//$'\r'/}"
@@ -111,9 +106,17 @@ jobs:
            echo "RG_NAME=$RG" >> $GITHUB_ENV
            echo "STORAGE_ACCOUNT_NAME=$SA" >> $GITHUB_ENV
            echo "STORAGE_CONTAINER_NAME=$CONTAINER" >> $GITHUB_ENV
-           echo "STATE_KEY_DEPLOYMENT=$KEY" >> $GITHUB_ENV
+           echo "STATE_KEY_BACKEND=$KEY" >> $GITHUB_ENV
 
-        # Clear Cahce
+        # Confirm Backend Variables
+      - name: Confirm Backend Variables
+        run: |
+          echo "Resource Group Name       : ${{ env.RG_NAME }}"
+          echo "Storage Account Name      : ${{ env.STORAGE_ACCOUNT_NAME }}"
+          echo "Storage Container Name    : ${{ env.STORAGE_CONTAINER_NAME }}"
+          echo "Terraform Backend State Key : ${{ env.STATE_KEY_BACKEND }}"
+
+      # Clear Terraform Cahce
       - name: Clear Cache
         run: |
           echo "Cleaning Cache..."
@@ -123,57 +126,89 @@ jobs:
           rm -rf environments/${ENV}/.terraform
           rm -f environments/${ENV}/.terraform.lock.hcl
 
+          rm -rf environments/terraform-backend/backend-deployment/.terraform
+          rm -f environments/terraform-backend/backend-migration/.terraform.lock.hcl
+
           echo "Cleanup Complete"
 
-        # Terraform Setup
+      # Terraform Setup
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: latest
 
-        # Terraform Version
+      # Terraform Version
       - name: Terraform Version
-        working-directory: .
         run: terraform version
 
-        # Initialize Terraform Withs Backend
+        # Terraform Init
       - name: Initialize Terraform
-        working-directory: .
-        run: |
-          echo "Initializing Terraform Backend..."
-          terraform init \
-          -backend-config="resource_group_name=$RG_NAME" \
-          -backend-config="storage_account_name=$STORAGE_ACCOUNT_NAME" \
-          -backend-config="container_name=$STORAGE_CONTAINER_NAME" \
-          -backend-config="key=$STATE_KEY_DEPLOYMENT"
+        working-directory: environments/terraform-backend/backend-deployment
+        run: terraform init
 
-      # Terraform Plan - Drift Detection
-      - name: Terraform Drift Detection
-        id: drift-plan
+      # Terraform Plan - Creates SG & RG
+      - name: Terraform Plan
+        working-directory: environments/terraform-backend/backend-deployment
         run: |
-          echo "Running Terraform Drift Detection..."
           terraform plan \
-          -var-file="$TFVARS_FILE" \
-          -detailed-exitcode \
-          -out=tfplan
-          exit_code=$?
+            -var-file=../../${ENV}/backend.tfvars \
+            -out=tfplan-backend
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-          echo "Terraform exit code: $exit_code"
-          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+      # Terraform Apply
+      - name: Terraform Apply
+        working-directory: environments/terraform-backend/backend-deployment
+        run: terraform apply -auto-approve tfplan-backend
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-          if [ $exit_code -eq 0 ]; then
-            echo "Drift Status: No Changes Detected"
-            echo "drift_status=no_drift" >> $GITHUB_OUTPUT
+      # Wait For RBAC Roles To Assign
+      - name: Wait for RBAC Roles To Assign
+        run: sleep 15
 
-          elif [ $exit_code -eq 2 ]; then
-            echo "Drift Status: Drift Detected! Current Code & Deployed Infra Mismatch"
-            echo "drift_status=drift_detected" >> $GITHUB_OUTPUT
-
-          else
-            echo "Terraform plan failed"
-            echo "drift_status=error" >> $GITHUB_OUTPUT
+      # Confirm State File - Backend Deployment Folder
+      - name: Confirm Local State File
+        run: |
+          STATE_FILE="environments/terraform-backend/backend-deployment/terraform.tfstate"
+          if [ ! -f "$STATE_FILE" ]; then
+            echo "Terraform State - Missing!"
             exit 1
           fi
+          echo "Found Terraform State - $STATE_FILE"
+
+        # Copy Local State Into Migration Folder
+      - name: Copy State Into Migraion Folder
+        run: |
+          cp environments/terraform-backend/backend-deployment/terraform.tfstate \
+            environments/terraform-backend/backend-migration/
+
+        # Confirm State File In Migration Folder
+      - name: Confirm State In Migration Folder
+        run: |
+          STATE_FILE=environments/terraform-backend/backend-migration/terraform.tfstate
+          if [ ! -f "$STATE_FILE" ]; then
+            echo "Terraform State - Missing!"
+            exit 1
+          fi
+          echo "Found Terraform State - $STATE_FILE"
+
+        # Terraform Init - Migration Folder - Migrate State
+      - name: Initialize Terraform & Migrate Local State
+        working-directory: environments/terraform-backend/backend-migration
+        run: |
+          terraform init \
+          -backend-config="resource_group_name=${{ env.RG_NAME }}" \
+          -backend-config="storage_account_name=${{ env.STORAGE_ACCOUNT_NAME }}" \
+          -backend-config="container_name=${{ env.STORAGE_CONTAINER_NAME }}" \
+          -backend-config="key=${{ env.STATE_KEY_BACKEND }}" \
+          -force-copy
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
