@@ -47,10 +47,7 @@ resource "azapi_data_plane_resource" "transcripts_index" {
       { name = "transcript_chunk", type = "Edm.String", searchable = true, analyzer = "en.microsoft" },
     ]
   }
-  depends_on = [
-    azurerm_search_service.search_service,
-    var.rdef_search_index_data_contributor_name
-  ]
+  depends_on = [azurerm_search_service.search_service]
 }
 
 # Attach UAI To Search Service 

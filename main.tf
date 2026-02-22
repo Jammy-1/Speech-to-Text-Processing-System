@@ -33,13 +33,11 @@ module "cognitive" {
   # Speech
   cognitive_account_name   = var.cognitive_account_name
   cognitive_account_uai_id = module.uai-rbac-fic.cognitive_account_uai_id
+  pe_subnet_id             = module.network.pe_subnet_id
 
   #Search
   search_service_name   = var.search_service_name
   search_service_uai_id = module.uai-rbac-fic.uai_search_service_id
-
-  # Subnet 
-  pe_subnet_id = module.network.pe_subnet_id
 
   # Access
   key_vault_id = module.key-vault.key_vault_id
