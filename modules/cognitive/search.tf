@@ -19,24 +19,19 @@ resource "azurerm_search_service" "search_service" {
   location            = var.location
   tags                = var.tags
 
-  sku             = "standard"
-  replica_count   = 3
+  sku             = "basic"
+  replica_count   = 1
   partition_count = 1
 
   public_network_access_enabled = true
   local_authentication_enabled  = true
   authentication_failure_mode   = "http403"
-
-  identity {
-    type         = "UserAssigned"
-    identity_ids = [var.search_service_uai_id]
-  }
 }
 
 # Search Index
 resource "azapi_data_plane_resource" "transcripts_index" {
   type      = "Microsoft.Search/searchServices/indexes@2024-07-01"
-  parent_id = "${azurerm_search_service.search_service.id}.search.windows.net"
+  parent_id = "${azurerm_search_service.search_service.name}.search.windows.net"
   name      = "transcripts-index"
   body = {
     fields = [
@@ -52,4 +47,29 @@ resource "azapi_data_plane_resource" "transcripts_index" {
       { name = "transcript_chunk", type = "Edm.String", searchable = true, analyzer = "en.microsoft" },
     ]
   }
+  depends_on = [
+    azurerm_search_service.search_service,
+    var.rdef_search_index_data_contributor_name
+  ]
+}
+
+# Attach UAI To Search Service 
+resource "azapi_update_resource" "attach_uai_search_service" {
+  type      = "Microsoft.Search/searchServices@2024-06-01-Preview"
+  name      = azurerm_search_service.search_service.name
+  parent_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.resource_group_name}"
+
+  body = {
+    identity = {
+      type = "UserAssigned"
+      userAssignedIdentities = {
+        for uai_id in [var.search_service_uai_id] : uai_id => {}
+      }
+    }
+  }
+
+  depends_on = [
+    azurerm_search_service.search_service,
+    azapi_data_plane_resource.transcripts_index
+  ]
 }
