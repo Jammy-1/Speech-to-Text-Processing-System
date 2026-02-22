@@ -77,10 +77,10 @@ jobs:
       branch: ${{ inputs.branch }}
 
   # Terraform Remote Backend Checks
-  terraform-remote-backend-checks:
+  backend-remote-checks:
     name: Terraform
     needs: terraform-plan
-    uses: ./.github/workflows/terraform-remote-backend-check.yml
+    uses: ./.github/workflows/backend-remote-check.yml
     with:
       branch: ${{ inputs.branch }}
     secrets:
@@ -90,11 +90,11 @@ jobs:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
   # Terraform Remote Backend Bootstrap
-  terraform-remote-backend-bootstrap:
-    name: Terraform
-    needs: terraform-remote-backend-checks
+  backend-remote-bootstrap:
+    name: Backend
+    needs: backend-remote-checks
     if: ${{ needs.terraform-remote-backend-checks.outputs.backend_exists == 'false' }}
-    uses: ./.github/workflows/terraform-remote-backend-bootstrap.yml
+    uses: ./.github/workflows/backend-remote-bootstrap.yml
     with:
       branch: ${{ inputs.branch }}
     secrets:
@@ -102,3 +102,43 @@ jobs:
       AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+  # Drift Detection After Remote-Backend Checks or Creation
+  drift-detection-backend:
+    name: Detection
+    needs:
+      - backend-remote-checks
+      - backend-remote-bootstrap
+    if: always()
+    uses: ./.github/workflows/backend-drift-detection.yml
+    with:
+      branch: ${{ inputs.branch }}
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+  drift-gate-backend:
+    name: Drift Gate Policy
+    runs-on: ubuntu-latest
+    needs: drift-detection-backend
+    if: always()
+    steps:
+      - name: Evaluate Drift Result
+        run: |
+          echo "Drift Status: ${{ needs.drift-detection-backend.outputs.drift_status }}"
+          echo "Exit Code: ${{ needs.drift-detection-backend.outputs.drift_exit_code }}"
+
+          if [ "${{ needs.drift-detection-backend.outputs.drift_status }}" = "drift_detected" ]; then
+            echo "Drift Detected - Blocking Pipeline"
+            echo "Infrastructure Drifted From Last Deployed State"
+            exit 1
+
+          elif [ "${{ needs.drift-detection-backend.outputs.drift_status }}" = "error" ]; then
+            echo "Terraform Error - Blocking Pipeline"
+            exit 1
+
+          else
+            echo "No Drift Detected - Safe To Continue"
+          fi
