@@ -19,20 +19,6 @@ on:
         required: false
         type: string
 
-  pull_request:
-    branches:
-      - dev
-      - staging
-      - main
-    paths:
-      - modules/**
-      - environments/dev/**
-      - environments/staging/**
-      - environments/production/**
-      - environments/terraform-backend/**
-      - main.tf
-      - variables.tf
-
 jobs:
   Remote-Backend-Bootstrap:
     runs-on: ubuntu-latest
@@ -216,11 +202,6 @@ jobs:
         # Terraform Init - Migration Folder - Migrate State
       - name: Initialize Terraform & Migrate Local State
         working-directory: environments/terraform-backend/backend-migration
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           terraform init \
           -backend-config="resource_group_name=${{ env.RG_NAME }}" \
@@ -228,3 +209,8 @@ jobs:
           -backend-config="container_name=${{ env.STORAGE_CONTAINER_NAME }}" \
           -backend-config="key=${{ env.STATE_KEY_BACKEND }}" \
           -force-copy
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
