@@ -93,7 +93,7 @@ jobs:
   backend-remote-bootstrap:
     name: Backend
     needs: backend-remote-checks
-    if: ${{ needs.terraform-remote-backend-checks.outputs.backend_exists == 'false' }}
+    if: ${{ needs.backend-remote-checks.outputs.backend_exists == 'false' }}
     uses: ./.github/workflows/backend-remote-bootstrap.yml
     with:
       branch: ${{ inputs.branch }}
@@ -109,8 +109,11 @@ jobs:
     needs:
       - backend-remote-checks
       - backend-remote-bootstrap
-    if: always()
     uses: ./.github/workflows/backend-drift-detection.yml
+    if: ${{
+      needs.backend-remote-checks.result == 'success' &&
+      (needs.backend-remote-bootstrap.result == 'success' || needs.backend-remote-bootstrap.result == 'skipped')
+      }}
     with:
       branch: ${{ inputs.branch }}
     secrets:
@@ -123,7 +126,6 @@ jobs:
     name: Drift Gate Policy
     runs-on: ubuntu-latest
     needs: drift-detection-backend
-    if: always()
     steps:
       - name: Evaluate Drift Result
         run: |
