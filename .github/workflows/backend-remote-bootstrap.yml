@@ -1,4 +1,4 @@
-name: Terraform - Remote Backend Bootstrap
+name: Backend - Remote Bootstrap
 
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-name: Terraform - Remote Backend Check
+name: Backend - Remote Check
 
 on:
   workflow_call:
