@@ -1,4 +1,4 @@
-name: Terraform - Drift Detection
+name: Terraform - Drift Detection Backend
 
 on:
   workflow_call:
@@ -6,6 +6,11 @@ on:
       branch:
         required: true
         type: string
+    secrets:
+      AZURE_CLIENT_ID:
+      AZURE_CLIENT_SECRET:
+      AZURE_SUBSCRIPTION_ID:
+      AZURE_TENANT_ID:
 
   workflow_dispatch:
     inputs:
@@ -27,7 +32,8 @@ jobs:
 
     outputs:
       env_name: ${{ steps.detect-env.outputs.env }}
-      needs-approval: ${{ steps.set-approval.outputs.needs_approval }}
+      drift_status: ${{ steps.drift-plan.outputs.drift_status }}
+      drift_exit_code: ${{ steps.drift-plan.outputs.exit_code }}
 
     steps:
       - name: Checkout Repo
@@ -95,7 +101,7 @@ jobs:
            RG=$(grep -E '^state_resource_group_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
            SA=$(grep -E '^state_storage_account_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
            CONTAINER=$(grep -E '^state_storage_container_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
-           KEY=$(grep -E '^state_key_deployment' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
+           KEY=$(grep -E '^state_key_backend' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
 
            RG="${RG//$'\r'/}"
            SA="${SA//$'\r'/}"
@@ -105,7 +111,7 @@ jobs:
            echo "RG_NAME=$RG" >> $GITHUB_ENV
            echo "STORAGE_ACCOUNT_NAME=$SA" >> $GITHUB_ENV
            echo "STORAGE_CONTAINER_NAME=$CONTAINER" >> $GITHUB_ENV
-           echo "STATE_KEY_DEPLOYMENT=$KEY" >> $GITHUB_ENV
+           echo "STATE_KEY_BACKEND=$KEY" >> $GITHUB_ENV
 
         # Clear Cahce
       - name: Clear Cache
@@ -139,7 +145,7 @@ jobs:
           -backend-config="resource_group_name=$RG_NAME" \
           -backend-config="storage_account_name=$STORAGE_ACCOUNT_NAME" \
           -backend-config="container_name=$STORAGE_CONTAINER_NAME" \
-          -backend-config="key=$STATE_KEY_DEPLOYMENT"
+          -backend-config="key=$STATE_KEY_BACKEND"
 
       # Terraform Plan - Drift Detection
       - name: Terraform Drift Detection
@@ -152,13 +158,20 @@ jobs:
           -out=tfplan
           exit_code=$?
 
+          echo "Terraform exit code: $exit_code"
+          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+
           if [ $exit_code -eq 0 ]; then
             echo "Drift Status: No Changes Detected"
+            echo "drift_status=no_drift" >> $GITHUB_OUTPUT
+
           elif [ $exit_code -eq 2 ]; then
             echo "Drift Status: Drift Detected! Current Code & Deployed Infra Mismatch"
-            exit 1
+            echo "drift_status=drift_detected" >> $GITHUB_OUTPUT
+
           else
             echo "Terraform plan failed"
+            echo "drift_status=error" >> $GITHUB_OUTPUT
             exit 1
           fi
         env:
