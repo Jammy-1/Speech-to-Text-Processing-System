@@ -11,6 +11,11 @@ on:
       AZURE_CLIENT_SECRET:
       AZURE_SUBSCRIPTION_ID:
       AZURE_TENANT_ID:
+    outputs:
+      drift_status:
+        value: ${{ jobs.Drift-Detection.outputs.drift_status }}
+      drift_exit_code:
+        value: ${{ jobs.Drift-Detection.outputs.drift_exit_code }}
 
   workflow_dispatch:
     inputs:
