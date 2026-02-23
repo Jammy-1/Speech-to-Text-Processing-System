@@ -1,0 +1,253 @@
+name: Multi Phased Terraform Deployment
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+    secrets:
+      AZURE_CLIENT_ID:
+      AZURE_CLIENT_SECRET:
+      AZURE_SUBSCRIPTION_ID:
+      AZURE_TENANT_ID:
+
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch To Run Workflow - Leave Empty For Current Branch"
+        required: false
+        type: string
+
+  pull_request:
+    branches:
+      - dev
+      - staging
+      - main
+    paths:
+      - modules/**
+      - environments/dev/**
+      - environments/staging/**
+      - environments/production/**
+      - environments/terraform-backend/**
+      - main.tf
+      - variables.tf
+
+jobs:
+  Multi-Phased-Terraform-Deployment:
+    runs-on: ubuntu-latest
+    env:
+      TF_LOG: "ERROR"
+      INPUT_BRANCH: ${{ inputs.branch }}
+      DISPATCH_BRANCH: ${{ github.event.inputs.branch }}
+
+    outputs:
+      env_name: ${{ steps.detect-env.outputs.env }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      # Determine Branch & Environment
+      - name: Determine Branch & Enviroment
+        id: detect-env
+        shell: bash
+        run: |
+          echo "Event: $GITHUB_EVENT_NAME"
+
+           if [ "$GITHUB_EVENT_NAME" = "workflow_call" ]; then
+            BRANCH="$INPUT_BRANCH"
+
+           elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ -n "$DISPATCH_BRANCH" ]; then
+            BRANCH="$DISPATCH_BRANCH"
+
+          elif [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            BRANCH="$GITHUB_BASE_REF"
+
+          else
+            BRANCH="${GITHUB_REF#refs/heads/}"
+          fi
+
+          echo "Branch: $BRANCH"
+
+          case "$BRANCH" in
+            dev) ENV="dev" ;;
+            staging) ENV="staging" ;;
+            main) ENV="production" ;;
+            *) echo "Invalid Branch: $BRANCH"; exit 1 ;;
+            esac
+
+          TFVARS_FILE="environments/${ENV}/${ENV}.tfvars"
+
+          echo "ENV=$ENV" >> $GITHUB_ENV
+          echo "TFVARS_FILE=$TFVARS_FILE" >> $GITHUB_ENV
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+
+          echo "Environment: $ENV"
+          echo "Using TFVARS File: $TFVARS_FILE"
+
+      # Determine Backend Variables
+      - name: Determine Backend Variables
+        run: |
+          BACKEND_FILE="environments/${ENV}/backend.tfvars"
+
+          if [ ! -f "$BACKEND_FILE" ]; then
+           echo "Backend TFVARS File Not Found: $BACKEND_FILE"
+           exit 1
+          fi
+
+           RG=$(grep -E '^state_resource_group_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
+           SA=$(grep -E '^state_storage_account_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
+           CONTAINER=$(grep -E '^state_storage_container_name' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
+           KEY=$(grep -E '^state_key_deployment' "$BACKEND_FILE" | awk -F'=' '{print $2}' | xargs)
+
+           RG="${RG//$'\r'/}"
+           SA="${SA//$'\r'/}"
+           CONTAINER="${CONTAINER//$'\r'/}"
+           KEY="${KEY//$'\r'/}"
+
+           echo "RG_NAME=$RG" >> $GITHUB_ENV
+           echo "STORAGE_ACCOUNT_NAME=$SA" >> $GITHUB_ENV
+           echo "STORAGE_CONTAINER_NAME=$CONTAINER" >> $GITHUB_ENV
+           echo "STATE_KEY_DEPLOYMENT=$KEY" >> $GITHUB_ENV
+
+        # Backend Variables
+      - name: Backend Variables
+        run: |
+          echo "Resource Group Name       : ${{ env.RG_NAME }}"
+          echo "Storage Account Name      : ${{ env.STORAGE_ACCOUNT_NAME }}"
+          echo "Storage Container Name    : ${{ env.STORAGE_CONTAINER_NAME }}"
+          echo "Terraform Deployment State Key : ${{ env.STATE_KEY_DEPLOYMENT }}"
+
+        # Modules
+      - name: List Module Folders
+        run: ls -l modules/
+
+        # Show Terraform Files
+      - name: Terraform Files
+        run: |
+          echo "All Terraform Files:"
+          find . -type f -name "*.tf" | sed 's/^/ - /'
+
+        # Clear Cahce
+      - name: Clear Cache
+        run: |
+          echo "Cleaning Cache..."
+
+          rm -rf .terraform .terraform.lock.hcl
+
+          rm -rf environments/${ENV}/.terraform
+          rm -f environments/${ENV}/.terraform.lock.hcl
+
+          echo "Cleanup Complete"
+
+        # Terraform Setup
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+        # Terraform Version
+      - name: Terraform Version
+        working-directory: .
+        run: terraform version
+
+        # Initialize Terraform Without Backend
+      - name: Initialize Terraform
+        working-directory: .
+        run: |
+          echo "Initializing Terraform Backend..."
+          terraform init -reconfigure \
+          -backend-config="resource_group_name=$RG_NAME" \
+          -backend-config="storage_account_name=$STORAGE_ACCOUNT_NAME" \
+          -backend-config="container_name=$STORAGE_CONTAINER_NAME" \
+          -backend-config="key=$STATE_KEY_DEPLOYMENT"
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+        # Format
+      - name: Terraform FMT
+        working-directory: .
+        run: terraform fmt -check -recursive
+
+        # Validation
+      - name: Terraform Validate
+        working-directory: .
+        run: terraform validate
+
+      # Terraform Plan - Phase 1
+      - name: Terraform Apply - Phase 1 - Foundation
+        working-directory: .
+        run: |
+          terraform apply -auto-approve \
+            -target=module.resource_group \
+            -target=module.storage \
+            -var-file="${TFVARS_FILE}" \
+            -out=tfplan-phase-1-foundation
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+        # Terraform Plan - Phase 2 - Cognitive
+      - name: Terraform Apply - Phase 2 - Cognitive
+        working-directory: .
+        run: |
+          terraform apply -auto-approve \
+            -target=module.cognitive \
+            -var-file="${TFVARS_FILE}" \
+            -out=tfplan-phase-2-cognitive
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+          # Terraform Plan - Phase 3 - Network
+      - name: Terraform Apply - Phase 3 - Network
+        working-directory: .
+        run: |
+          terraform apply -auto-approve \
+            -target=module.network \
+            -var-file="${TFVARS_FILE}" \
+            -out=tfplan-phase-3-network
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+        # Terraform Plan - Phase 3 - Services
+      - name: Terraform Apply - Phase 3 - Services
+        working-directory: .
+        run: |
+          terraform apply -auto-approve \
+            -target=module.queue \
+            -target=module.acr \
+            -target=module.aks \
+            -target=module.log-analytics \
+            -var-file="${TFVARS_FILE}" \
+            -out=tfplan-phase-3-services
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      # Terraform Plan - Phase 3 - Identities
+      - name: Terraform Apply - Phase 4 - Identities
+        working-directory: .
+        run: |
+          terraform apply -auto-approve \
+            -target=module.uai-rbac-fic \
+            -var-file="${TFVARS_FILE}" \
+            -out=tfplan-phase-4-identities
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
