@@ -43,6 +43,11 @@ jobs:
 
     outputs:
       env_name: ${{ steps.detect-env.outputs.env }}
+      phase1_status: ${{ steps.phase1.outcome }}
+      phase2_status: ${{ steps.phase2.outcome }}
+      phase3_status: ${{ steps.phase3.outcome }}
+      phase4_status: ${{ steps.phase4.outcome }}
+      phase5_status: ${{ steps.phase5.outcome }}
 
     steps:
       - name: Checkout Repo
@@ -178,8 +183,9 @@ jobs:
         working-directory: .
         run: terraform validate
 
-      # Terraform Plan - Phase 1
+      # Terraform Plan - Phase 1 - Foundation
       - name: Terraform Apply - Phase 1 - Foundation
+        id: phase1
         working-directory: .
         run: |
           terraform apply -auto-approve \
@@ -195,6 +201,7 @@ jobs:
 
         # Terraform Plan - Phase 2 - Cognitive
       - name: Terraform Apply - Phase 2 - Cognitive
+        id: phase2
         working-directory: .
         run: |
           terraform apply -auto-approve \
@@ -209,6 +216,7 @@ jobs:
 
           # Terraform Plan - Phase 3 - Network
       - name: Terraform Apply - Phase 3 - Network
+        id: phase3
         working-directory: .
         run: |
           terraform apply -auto-approve \
@@ -221,8 +229,9 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-        # Terraform Plan - Phase 3 - Services
-      - name: Terraform Apply - Phase 3 - Services
+        # Terraform Plan - Phase 4 - Services
+      - name: Terraform Apply - Phase 4 - Services
+        id: phase4
         working-directory: .
         run: |
           terraform apply -auto-approve \
@@ -238,8 +247,9 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-      # Terraform Plan - Phase 3 - Identities
-      - name: Terraform Apply - Phase 4 - Identities
+      # Terraform Plan - Phase 5 - Identities
+      - name: Terraform Apply - Phase 5 - Identities
+        id: phase5
         working-directory: .
         run: |
           terraform apply -auto-approve \
