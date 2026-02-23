@@ -183,6 +183,17 @@ jobs:
         working-directory: .
         run: terraform validate
 
+      # Terraform Plan
+      - name: Terraform Plan
+        run: |
+          terraform plan \
+            -var-file="${TFVARS_FILE}"
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
       # Terraform Plan - Phase 1 - Foundation
       - name: Terraform Apply - Phase 1 - Foundation
         id: phase1
@@ -192,7 +203,6 @@ jobs:
             -target=module.resource_group \
             -target=module.storage \
             -var-file="${TFVARS_FILE}" \
-            -out=tfplan-phase-1-foundation
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -207,7 +217,6 @@ jobs:
           terraform apply -auto-approve \
             -target=module.cognitive \
             -var-file="${TFVARS_FILE}" \
-            -out=tfplan-phase-2-cognitive
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -222,7 +231,6 @@ jobs:
           terraform apply -auto-approve \
             -target=module.network \
             -var-file="${TFVARS_FILE}" \
-            -out=tfplan-phase-3-network
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -240,7 +248,6 @@ jobs:
             -target=module.aks \
             -target=module.log-analytics \
             -var-file="${TFVARS_FILE}" \
-            -out=tfplan-phase-3-services
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -255,7 +262,6 @@ jobs:
           terraform apply -auto-approve \
             -target=module.uai-rbac-fic \
             -var-file="${TFVARS_FILE}" \
-            -out=tfplan-phase-4-identities
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
