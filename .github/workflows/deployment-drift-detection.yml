@@ -133,12 +133,12 @@ jobs:
 
         # Terraform Version
       - name: Terraform Version
-        working-directory: .
+        working-directory: environments\terraform-backend\backend-migration
         run: terraform version
 
         # Initialize Terraform Withs Backend
       - name: Initialize Terraform
-        working-directory: .
+        working-directory: environments\terraform-backend\backend-migration
         run: |
           echo "Initializing Terraform Backend..."
           terraform init \
@@ -146,6 +146,11 @@ jobs:
           -backend-config="storage_account_name=$STORAGE_ACCOUNT_NAME" \
           -backend-config="container_name=$STORAGE_CONTAINER_NAME" \
           -backend-config="key=$STATE_KEY_DEPLOYMENT"
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
       # Terraform Plan - Drift Detection
       - name: Terraform Drift Detection
