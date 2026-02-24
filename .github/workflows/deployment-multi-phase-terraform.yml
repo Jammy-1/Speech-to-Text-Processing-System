@@ -1,4 +1,4 @@
-name: Multi Phased Terraform Deployment
+name: Deployment - Multi Phased Terraform
 
 on:
   workflow_call:
@@ -201,7 +201,7 @@ jobs:
         run: |
           terraform apply -auto-approve \
             -target=module.resource_group \
-            -target=module.storage \
+            -target=module.network \
             -var-file="${TFVARS_FILE}" \
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -209,13 +209,14 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-        # Terraform Plan - Phase 2 - Cognitive
-      - name: Terraform Apply - Phase 2 - Cognitive
+        # Terraform Plan - Phase 2 - Core
+      - name: Terraform Apply - Phase 2 - Core
         id: phase2
         working-directory: .
         run: |
           terraform apply -auto-approve \
-            -target=module.cognitive \
+            -target=module.storage \
+            -target=module.log-analytics \
             -var-file="${TFVARS_FILE}" \
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -223,13 +224,13 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-          # Terraform Plan - Phase 3 - Network
-      - name: Terraform Apply - Phase 3 - Network
+          # Terraform Plan - Phase 3 - Cognitive
+      - name: Terraform Apply - Phase 3 - Cognitive
         id: phase3
         working-directory: .
         run: |
           terraform apply -auto-approve \
-            -target=module.network \
+            -target=module.cognitive \
             -var-file="${TFVARS_FILE}" \
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -246,7 +247,6 @@ jobs:
             -target=module.queue \
             -target=module.acr \
             -target=module.aks \
-            -target=module.log-analytics \
             -var-file="${TFVARS_FILE}" \
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
