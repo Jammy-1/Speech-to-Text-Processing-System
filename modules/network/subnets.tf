@@ -22,6 +22,13 @@ resource "azurerm_subnet" "pe" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = ["10.0.3.0/24"]
+
+  service_endpoints = [
+  "Microsoft.ContainerRegistry",
+  "Microsoft.Storage",
+  "Microsoft.KeyVault",
+  "Microsoft.CognitiveServices"
+]
 }
 
 # Subnet - Queue
