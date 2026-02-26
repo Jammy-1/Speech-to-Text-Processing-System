@@ -107,7 +107,7 @@ resource "azurerm_private_endpoint" "acr_pe" {
   private_service_connection {
     name                           = "acr-psc"
     is_manual_connection           = false
-    private_connection_resource_id = var.service_bus_id
+    private_connection_resource_id = var.acr_id
     subresource_names              = ["registry"]
   }
 
