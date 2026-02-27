@@ -24,11 +24,11 @@ resource "azurerm_subnet" "pe" {
   address_prefixes     = ["10.0.3.0/24"]
 
   service_endpoints = [
-  "Microsoft.ContainerRegistry",
-  "Microsoft.Storage",
-  "Microsoft.KeyVault",
-  "Microsoft.CognitiveServices"
-]
+    "Microsoft.ContainerRegistry",
+    "Microsoft.Storage",
+    "Microsoft.KeyVault",
+    "Microsoft.CognitiveServices"
+  ]
 }
 
 # Subnet - Queue
