@@ -10,7 +10,7 @@ resource "azurerm_user_assigned_identity" "api_uai" {
 
 # RBAC - API Service Bus Sender
 resource "azurerm_role_assignment" "rbac_api_sb_sender" {
-  scope                = var.service_bus_namespace_id
+  scope                = var.storage_queue_id
   role_definition_name = "Azure Service Bus Data Sender"
   principal_id         = azurerm_user_assigned_identity.api_uai.principal_id
 }
