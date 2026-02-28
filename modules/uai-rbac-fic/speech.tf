@@ -9,7 +9,7 @@ resource "azurerm_user_assigned_identity" "cognitive_account_uai" {
   tags                = var.tags
 }
 
-# RBAC - CA - Speech Service
+# RBAC - CA - Speech Service - Key Vault
 resource "azurerm_role_assignment" "cognitive_rbac" {
   scope                = var.key_vault_id
   role_definition_name = "Key Vault Secrets User"
@@ -28,7 +28,7 @@ resource "azurerm_user_assigned_identity" "speech_worker_uai" {
 # RBAC - Speech K8 Worker - Storage -  Audio Container  
 resource "azurerm_role_assignment" "rbac_speech_worker_audio_container" {
   scope                = var.audio_container_id
-  role_definition_name = "Storage Blob Data Contributor"
+  role_definition_name = "Blob Data Reader"
   principal_id         = azurerm_user_assigned_identity.speech_worker_uai.principal_id
 }
 
@@ -39,10 +39,17 @@ resource "azurerm_role_assignment" "rbac_speech_worker_transcripts_container" {
   principal_id         = azurerm_user_assigned_identity.speech_worker_uai.principal_id
 }
 
-# RBAC - K8 - Speech Worker  - Speech 
+# RBAC - K8 - Speech Worker  - Speech Service Access
 resource "azurerm_role_assignment" "rbac_cognitive_speech_worker" {
   scope                = var.speech_id
   role_definition_name = "Cognitive Services User"
+  principal_id         = azurerm_user_assigned_identity.speech_worker_uai.principal_id
+}
+
+# Service Bus - Speech Queue Access
+resource "azurerm_role_assignment" "rbac_speech_worker_servicebus" {
+  scope                = var.storage_queue_id
+  role_definition_name = "Azure Service Bus Data Receiver"
   principal_id         = azurerm_user_assigned_identity.speech_worker_uai.principal_id
 }
 
