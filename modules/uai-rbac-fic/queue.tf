@@ -23,7 +23,7 @@ resource "azurerm_role_assignment" "rbac_service_bus_storage_worker_receive" {
 
 # RBAC - API - Send
 resource "azurerm_role_assignment" "rbac_service_bus_api_send" {
-  scope                = azurerm_servicebus_namespace.service_bus.id
+  scope                = var.service_bus_id
   role_definition_name = "Azure Service Bus Data Sender"
   principal_id         = azurerm_user_assigned_identity.uai_aks.principal_id
 }

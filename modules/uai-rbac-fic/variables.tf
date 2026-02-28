@@ -17,6 +17,7 @@ variable "uai_speech_worker_name" { type = string }
 variable "uai_search_service_name" { type = string }
 variable "search_service_id" { type = string }
 variable "uai_search_worker_name" { type = string }
+variable "search_queue_id" { type = string }
 
 # API 
 variable "uai_api_worker_name" { type = string }
@@ -24,6 +25,8 @@ variable "uai_api_worker_name" { type = string }
 # Queue
 variable "service_bus_id" { type = string }
 variable "service_bus_namespace_id" { type = string }
+variable "storage_queue_id" { type = string }
+variable "speech_queue_id" { type = string }
 
 # AKS
 variable "aks_oidc" { type = string }

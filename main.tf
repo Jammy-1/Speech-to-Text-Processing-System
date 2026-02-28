@@ -18,9 +18,6 @@ module "storage" {
   # Network
   pe_subnet_id = module.network.pe_subnet_id
 
-  # Logs
-  log_workspace_id = module.log-analytics.log_analytics_workspace_id
-  storage_log_name = var.storage_log_name
 }
 
 # Cognitive - Speech & Search
@@ -97,6 +94,7 @@ module "uai-rbac-fic" {
   uai_api_worker_name      = var.uai_api_worker_name
   service_bus_namespace_id = module.queue.service_bus_id
   aks_oidc                 = module.aks.aks_oidc
+  storage_queue_id         = module.queue.storage_queue_id
 
   # ACR 
   uai_acr_encryption_name = var.uai_acr_encryption_name
@@ -118,10 +116,12 @@ module "uai-rbac-fic" {
   speech_id                  = module.cognitive.speech_id
   uai_name_cognitive_account = var.uai_name_cognitive_account
   uai_speech_worker_name     = var.uai_speech_worker_name
+  speech_queue_id            = module.queue.speech_queue_id
 
   # Search
   uai_search_service_name = var.search_service_name
   uai_search_worker_name  = var.uai_search_worker_name
+  search_queue_id         = module.queue.search_queue_id
   search_service_id       = module.cognitive.search_id
   key_vault_id            = module.key-vault.key_vault_id
 
@@ -198,6 +198,8 @@ module "log-analytics" {
   tags                = var.tags
 
   log_workspace_name = var.log_workspace_name
+  storage_log_name   = var.storage_log_name
+  storage_account_id = module.storage.storage_account_id
 }
 
 # K8
