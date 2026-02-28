@@ -28,7 +28,7 @@ resource "azurerm_user_assigned_identity" "speech_worker_uai" {
 # RBAC - Speech K8 Worker - Storage -  Audio Container  
 resource "azurerm_role_assignment" "rbac_speech_worker_audio_container" {
   scope                = var.audio_container_id
-  role_definition_name = "Blob Data Reader"
+  role_definition_name = "Storage Blob Data Reader"
   principal_id         = azurerm_user_assigned_identity.speech_worker_uai.principal_id
 }
 
