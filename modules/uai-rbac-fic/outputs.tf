@@ -17,3 +17,6 @@ output "uai_acr_encryption_client_id" { value = azurerm_user_assigned_identity.u
 # AKS
 output "uai_aks_id" { value = azurerm_user_assigned_identity.uai_aks.id }
 output "uai_aks_principal_id" { value = azurerm_user_assigned_identity.uai_aks.principal_id }
+
+# Queue
+output "service_bus_uai_id" { value = azurerm_user_assigned_identity.service_bus_uai.id }
