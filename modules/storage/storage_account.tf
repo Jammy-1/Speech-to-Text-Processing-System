@@ -31,14 +31,3 @@ resource "azurerm_storage_container" "transcripts" {
   storage_account_id    = azurerm_storage_account.storage_account.id
   container_access_type = "private"
 }
-
-# Monitoring
-resource "azurerm_monitor_diagnostic_setting" "storage_logs" {
-  name                       = var.storage_log_name
-  target_resource_id         = azurerm_storage_account.storage_account.id
-  log_analytics_workspace_id = var.log_workspace_id
-
-  enabled_log { category = "StorageRead" }
-  enabled_log { category = "StorageWrite" }
-  enabled_log { category = "StorageDelete" }
-}
