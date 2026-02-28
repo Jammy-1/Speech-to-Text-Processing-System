@@ -69,27 +69,3 @@ resource "azurerm_servicebus_queue" "storage_queue" {
   default_message_ttl                  = "P7D"
   dead_lettering_on_message_expiration = true
 }
-
-
-# RBAC - Send - AKS UAI Link
-resource "azurerm_role_assignment" "rbac_service_bus_send" {
-  scope                = azurerm_servicebus_namespace.service_bus.id
-  role_definition_name = "Azure Service Bus Data Sender"
-  principal_id         = var.aks_uai_principal_id
-}
-
-# RBAC - Receive - AKS UAI Link
-resource "azurerm_role_assignment" "rbac_service_bus_receive" {
-  scope                = azurerm_servicebus_namespace.service_bus.id
-  role_definition_name = "Azure Service Bus Data Receiver"
-  principal_id         = var.aks_uai_principal_id
-}
-
-# RBAC - Storage - AKS UAI Link
-resource "azurerm_role_assignment" "rbac_service_bus_storage" {
-  scope                = azurerm_servicebus_namespace.service_bus.id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = var.aks_uai_principal_id
-}
-
-
