@@ -1,5 +1,19 @@
 # UAI & RBAC For Queue - modules\queue
 
+# UAI - Service Bus
+resource "azurerm_user_assigned_identity" "service_bus_uai" {
+  name                = var.service_bus_uai_name
+  resource_group_name = var.resource_group_name
+  location            = var.location
+}
+
+# RBAC - Key Vault 
+resource "azurerm_role_assignment" "rbac_service_bus_kv_access" {
+  scope                = var.key_vault_id
+  role_definition_name = "Key Vault Crypto User"
+  principal_id         = azurerm_user_assigned_identity.service_bus_uai.principal_id
+}
+
 # RBAC - Speech Worker - Service Bus Receive 
 resource "azurerm_role_assignment" "rbac_service_bus_speech_worker_receive" {
   scope                = var.speech_queue_id
