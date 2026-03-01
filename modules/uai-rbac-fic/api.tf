@@ -17,11 +17,12 @@ resource "azurerm_role_assignment" "rbac_api_sb_sender" {
 
 # FIC - API
 resource "azurerm_federated_identity_credential" "api_fic" {
-  name      = "api-fic"
-  parent_id = azurerm_user_assigned_identity.api_uai.id
-  issuer    = var.aks_oidc
-  subject   = "system:serviceaccount:api-stt:api-sa"
-  audience  = ["api://AzureADTokenExchange"]
+  name                = "api-fic"
+  resource_group_name = var.resource_group_name
+  parent_id           = azurerm_user_assigned_identity.api_uai.id
+  issuer              = var.aks_oidc
+  subject             = "system:serviceaccount:api-stt:api-sa"
+  audience            = ["api://AzureADTokenExchange"]
 
   depends_on = [azurerm_user_assigned_identity.api_uai]
 }
