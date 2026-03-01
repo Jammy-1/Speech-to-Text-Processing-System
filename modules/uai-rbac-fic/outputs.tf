@@ -11,8 +11,7 @@ output "rdef_search_index_data_contributor_name" { value = data.azurerm_role_def
 output "uai_api_worker_client_id" { value = azurerm_user_assigned_identity.api_uai.client_id }
 
 # ACR 
-output "uai_acr_encryption_id" { value = azurerm_user_assigned_identity.uai_acr_encryption.id }
-output "uai_acr_encryption_client_id" { value = azurerm_user_assigned_identity.uai_acr_encryption.client_id }
+output "uai_acr_id" { value = azurerm_user_assigned_identity.uai_acr.id }
 
 # AKS
 output "uai_aks_id" { value = azurerm_user_assigned_identity.uai_aks.id }
