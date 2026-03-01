@@ -14,12 +14,10 @@ resource "azurerm_servicebus_namespace" "service_bus" {
   local_auth_enabled            = false
   minimum_tls_version           = "1.2"
 
-  customer_managed_key {
-    key_vault_key_id = var.key_vault_id
-    identity_id      = var.service_bus_encryption_key_id
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [var.service_bus_uai_id]
   }
-
-  identity { type = "SystemAssigned" }
 }
 
 # Queue - Speech
