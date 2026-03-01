@@ -21,9 +21,3 @@ resource "azurerm_role_assignment" "rbac_aks_network" {
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_user_assigned_identity.uai_aks.principal_id
 }
-
-resource "azurerm_role_assignment" "rbac_aks_disk_encryption" {
-  scope                = var.disk_encryption_set_id
-  role_definition_name = "Contributor"
-  principal_id         = azurerm_user_assigned_identity.uai_aks.principal_id
-}
