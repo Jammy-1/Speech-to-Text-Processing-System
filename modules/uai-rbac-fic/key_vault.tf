@@ -16,4 +16,3 @@ resource "azurerm_role_assignment" "rbac_ci_cd_kv_admin" {
 
   depends_on = [azurerm_user_assigned_identity.ci_cd_uai_kv_admin]
 }
-
