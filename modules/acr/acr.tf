@@ -1,5 +1,5 @@
 # ACR
-resource "azurerm_container_registry" "main" {
+resource "azurerm_container_registry" "acr" {
   name                = var.acr_name
   resource_group_name = var.resource_group_name
   location            = var.location
@@ -19,18 +19,6 @@ resource "azurerm_container_registry" "main" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [var.uai_acr_encryption_id]
+    identity_ids = [var.uai_acr_id]
   }
-
-  encryption {
-    key_vault_key_id   = var.acr_encryption_key_id
-    identity_client_id = var.uai_acr_encryption_client_id
-  }
-
-  georeplications {
-    location = "ukwest"
-    tags     = var.tags
-  }
-
-  zone_redundancy_enabled = true
 }
