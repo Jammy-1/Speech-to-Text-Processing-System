@@ -20,10 +20,3 @@ variable "log_workspace_id" { type = string }
 
 # UAI
 variable "uai_aks_id" { type = string }
-
-# Key Vault
-variable "disk_encryption_set_id" { type = string }
-
-# ACR
-variable "acr_id" { type = string }
-

@@ -1,4 +1,4 @@
-resource "azurerm_kubernetes_cluster" "main" {
+resource "azurerm_kubernetes_cluster" "aks" {
   name                = var.kubernetes_cluster_name
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -6,13 +6,13 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   private_cluster_enabled           = false
   role_based_access_control_enabled = true
-  local_account_disabled            = true
+  local_account_disabled            = false
   azure_policy_enabled              = true
   automatic_upgrade_channel         = "stable"
-  disk_encryption_set_id            = var.disk_encryption_set_id
 
-  dns_prefix          = var.aks_dns
-  oidc_issuer_enabled = true
+  dns_prefix                = var.aks_dns
+  oidc_issuer_enabled       = true
+  workload_identity_enabled = true
 
   identity {
     type         = "UserAssigned"
@@ -23,7 +23,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     name = var.aks_node_pool_name
 
     auto_scaling_enabled    = true
-    host_encryption_enabled = true
+    host_encryption_enabled = false
 
     min_count       = var.aks_node_scaling_min
     max_count       = var.aks_node_scaling_max
@@ -45,11 +45,6 @@ resource "azurerm_kubernetes_cluster" "main" {
   monitor_metrics {
     annotations_allowed = null
     labels_allowed      = null
-  }
-
-  key_vault_secrets_provider {
-    secret_rotation_enabled  = true
-    secret_rotation_interval = "2m"
   }
 
   oms_agent { log_analytics_workspace_id = var.log_workspace_id }
