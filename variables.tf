@@ -9,7 +9,6 @@ variable "uai_name_cognitive_account" { type = string }
 
 # Search 
 variable "search_service_name" { type = string }
-
 variable "uai_search_service_name" { type = string }
 variable "uai_search_worker_name" { type = string }
 
@@ -18,7 +17,7 @@ variable "service_bus" { type = string }
 variable "speech_queue" { type = string }
 variable "search_queue" { type = string }
 variable "storage_queue" { type = string }
-variable "service_bus_encryption_key_name" { type = string }
+variable "service_bus_uai_name" { type = string }
 
 # Storage 
 variable "storage_account_name" { type = string }
@@ -30,15 +29,13 @@ variable "log_workspace_name" { type = string }
 
 # ACR
 variable "acr_name" { type = string }
-variable "uai_acr_encryption_name" { type = string }
+variable "uai_acr_name" { type = string }
 variable "uai_ci_cd_acr_name" { type = string }
 
 # AKS
 variable "kubernetes_cluster_name" { type = string }
 variable "aks_dns" { type = string }
 variable "aks_node_pool_name" { type = string }
-
-variable "aks_disk_encryption_key_name" { type = string }
 
 variable "aks_node_scaling_min" { type = number }
 variable "aks_node_scaling_max" { type = number }
@@ -71,8 +68,6 @@ variable "uai_api_worker_name" { type = string }
 # Key Vault
 variable "key_vault_name" { type = string }
 variable "uai_ci_cd_kv_admin_name" { type = string }
-
-variable "acr_encryption_key_name" { type = string }
 
 # Key Vault - Speech Key 
 variable "speech_key_name" { type = string }

@@ -17,7 +17,6 @@ module "storage" {
 
   # Network
   pe_subnet_id = module.network.pe_subnet_id
-
 }
 
 # Cognitive - Speech & Search
@@ -48,14 +47,8 @@ module "acr" {
   location            = var.location
   tags                = var.tags
 
-  acr_name     = var.acr_name
-  uai_acr_name = var.acr_name
-
-  # UAI- RBAC 
-  uai_acr_encryption_client_id = module.uai-rbac-fic.uai_acr_encryption_client_id
-  uai_acr_encryption_id        = module.uai-rbac-fic.uai_acr_encryption_id
-  acr_encryption_key_id        = module.key-vault.acr_encryption_key_id
-  aks_uai_principal_id         = module.uai-rbac-fic.uai_aks_principal_id
+  acr_name   = var.acr_name
+  uai_acr_id = module.uai-rbac-fic.uai_acr_id
 }
 
 # AKS
@@ -73,14 +66,12 @@ module "aks" {
   aks_subnet_id = module.network.aks_subnet_id
 
   # AKS Parameters
-  aks_node_pool_name     = var.aks_node_pool_name
-  aks_node_scaling_min   = var.aks_node_scaling_min
-  aks_node_scaling_max   = var.aks_node_scaling_max
-  aks_node_size          = var.aks_node_size
-  aks_node_os_disk_size  = var.aks_node_os_disk_size
-  log_workspace_id       = module.log-analytics.log_analytics_workspace_id
-  disk_encryption_set_id = module.key-vault.aks_disk_encryption_key_id
-  acr_id                 = module.acr.acr_id
+  aks_node_pool_name    = var.aks_node_pool_name
+  aks_node_scaling_min  = var.aks_node_scaling_min
+  aks_node_scaling_max  = var.aks_node_scaling_max
+  aks_node_size         = var.aks_node_size
+  aks_node_os_disk_size = var.aks_node_os_disk_size
+  log_workspace_id      = module.log-analytics.log_analytics_workspace_id
 }
 
 # UAI - RBAC - FIC
@@ -97,15 +88,13 @@ module "uai-rbac-fic" {
   storage_queue_id         = module.queue.storage_queue_id
 
   # ACR 
-  uai_acr_encryption_name = var.uai_acr_encryption_name
-  uai_ci_cd_acr_name      = var.uai_ci_cd_acr_name
-  acr_encryption_key_id   = module.key-vault.acr_encryption_key_id
-  acr_id                  = module.acr.acr_id
+  uai_acr_name       = var.uai_acr_name
+  uai_ci_cd_acr_name = var.uai_ci_cd_acr_name
+  acr_id             = module.acr.acr_id
 
   # AKS
-  uai_aks_name           = var.uai_aks_name
-  disk_encryption_set_id = module.key-vault.aks_disk_encryption_key_id
-  aks_subnet_id          = module.network.aks_subnet_id
+  uai_aks_name  = var.uai_aks_name
+  aks_subnet_id = module.network.aks_subnet_id
 
   # Storage
   audio_container_id       = module.storage.audio_container_id
@@ -129,7 +118,8 @@ module "uai-rbac-fic" {
   uai_ci_cd_kv_admin_name = var.uai_ci_cd_kv_admin_name
 
   # Queue
-  service_bus_id = module.queue.service_bus_id
+  service_bus_id       = module.queue.service_bus_id
+  service_bus_uai_name = var.service_bus_uai_name
 
   depends_on = [module.resource_group]
 }
@@ -141,28 +131,22 @@ module "key-vault" {
   location            = var.location
   tags                = var.tags
 
+  # Key Vault
   key_vault_name = var.key_vault_name
-
-  # ServiceBus
-  servicebus_encryption_key_name = var.service_bus_encryption_key_name
 
   #Network
   pe_subnet_id = module.network.pe_subnet_id
 
-  # ACR
-  acr_encryption_key_name = var.acr_encryption_key_name
-
   # Speech 
-  speech_key_name    = var.speech_key_name
-  speech_primary_key = module.cognitive.speech_primary_key
+  speech_name     = module.cognitive.speech_name
+  speech_key_name = var.speech_key_name
 
   # Search
-  search_key_name    = var.search_key_name
-  search_primary_key = module.cognitive.search_primary_key
+  search_name     = module.cognitive.search_name
+  search_key_name = var.search_key_name
 
   # AKS
-  aks_principal_id             = module.uai-rbac-fic.uai_aks_principal_id
-  aks_disk_encryption_key_name = var.acr_encryption_key_name
+  aks_principal_id = module.uai-rbac-fic.uai_aks_principal_id
 
   depends_on = [module.resource_group]
 }
@@ -174,16 +158,14 @@ module "queue" {
   location            = var.location
   tags                = var.tags
 
-  key_vault_id = module.key-vault.key_vault_id
-
   # Names
   speech_queue_name  = var.speech_queue
   search_queue_name  = var.search_queue
   storage_queue_name = var.storage_queue
 
   # Service Bus 
-  service_bus_name              = var.service_bus
-  service_bus_encryption_key_id = module.key-vault.service_bus_encryption_key_id
+  service_bus_name   = var.service_bus
+  service_bus_uai_id = module.uai-rbac-fic.service_bus_uai_id
 
   # AKS
   aks_uai_principal_id = module.uai-rbac-fic.uai_aks_principal_id
