@@ -46,8 +46,6 @@ jobs:
       phase1_status: ${{ steps.phase1.outcome }}
       phase2_status: ${{ steps.phase2.outcome }}
       phase3_status: ${{ steps.phase3.outcome }}
-      phase4_status: ${{ steps.phase4.outcome }}
-      phase5_status: ${{ steps.phase5.outcome }}
 
     steps:
       - name: Checkout Repo
@@ -194,74 +192,49 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-      # Terraform Plan - Phase 1 - Foundation
-      - name: Terraform Apply - Phase 1 - Foundation
+      # Terraform Plan - Phase 1 - Core Infrastructure
+      - name: Terraform Apply - Phase 1 - Core Infrastructure
         id: phase1
         working-directory: .
         run: |
           terraform apply -auto-approve \
             -target=module.resource_group \
             -target=module.network \
-            -var-file="${TFVARS_FILE}" \
+            -target=module.log-analytics \
+            -var-file="${TFVARS_FILE}"
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-        # Terraform Plan - Phase 2 - Core
-      - name: Terraform Apply - Phase 2 - Core
+        # Terraform Plan - Phase 2 - Identity, Security & Storage
+      - name: Terraform Apply - Phase 2 - Identity, Security & Storage
         id: phase2
         working-directory: .
         run: |
           terraform apply -auto-approve \
+            -target=module.uai-rbac-fic \
+            -target=module.key-vault \
             -target=module.storage \
-            -target=module.log-analytics \
-            -var-file="${TFVARS_FILE}" \
+            -target=module.queue \
+            -var-file="${TFVARS_FILE}"
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-          # Terraform Plan - Phase 3 - Cognitive
-      - name: Terraform Apply - Phase 3 - Cognitive
+          # Terraform Plan - Phase 3 - Platform
+      - name: Terraform Apply - Phase 3 - Platform
         id: phase3
         working-directory: .
         run: |
           terraform apply -auto-approve \
-            -target=module.cognitive \
-            -var-file="${TFVARS_FILE}" \
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-        # Terraform Plan - Phase 4 - Services
-      - name: Terraform Apply - Phase 4 - Services
-        id: phase4
-        working-directory: .
-        run: |
-          terraform apply -auto-approve \
-            -target=module.queue \
             -target=module.acr \
+            -target=module.cognitive \
             -target=module.aks \
-            -var-file="${TFVARS_FILE}" \
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-      # Terraform Plan - Phase 5 - Identities
-      - name: Terraform Apply - Phase 5 - Identities
-        id: phase5
-        working-directory: .
-        run: |
-          terraform apply -auto-approve \
-            -target=module.uai-rbac-fic \
-            -var-file="${TFVARS_FILE}" \
+            -var-file="${TFVARS_FILE}"
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
