@@ -1,5 +1,3 @@
-# Production TFVARS
-
 # General
 resource_group_name = "Speech-to-Text-Processing-System-Production"
 location            = "UKSOUTH"
@@ -8,10 +6,10 @@ location            = "UKSOUTH"
 tags = {
   Project     = "Speech-to-Text-Processing-System-Production"
   Environment = "Production"
-  Owner       = "dev-ops"
+  Owner       = "Dev-Ops"
   CostCenter  = "Speech-to-Text-Processing-System-Production"
-  ManagedBy   = "dev-ops"
-  CreatedDate = "2026-02-16"
+  ManagedBy   = "Platform"
+  CreatedDate = "2026-01-17"
 }
 
 # Storage
@@ -20,13 +18,12 @@ uai_storage_worker_name = "uai-storage-worker"
 
 
 # Log Analytics
-log_workspace_name = "stt-log-analytics-prod"
+log_workspace_name = "stt-log-analytics"
 storage_log_name   = "storage-logs-stt-prod"
 
 # Key Vault
 key_vault_name          = "kv-stt-prod"
-acr_encryption_key_name = "stt-acr-encrypt-key"
-uai_ci_cd_kv_admin_name = "kv-admin-uai"
+uai_ci_cd_kv_admin_name = "kv-admin-uai-ci-cd"
 
 
 speech_key_name = "stt-speech-kv-key"
@@ -35,12 +32,12 @@ search_key_name = "stt-search-key"
 # Cognitive: 
 
 #Speech
-cognitive_account_name     = "stt-cognitive-search-prod"
+cognitive_account_name     = "stt-cognitive-speech-prod"
 uai_name_cognitive_account = "uai-ca-speech-service"
 uai_speech_worker_name     = "uai-speech-worker"
 
 # Search
-search_service_name     = "search-service-stt-prod"
+search_service_name     = "search-service-stt-production"
 uai_search_service_name = "uai-search-service"
 uai_search_worker_name  = "uai-search-worker"
 
@@ -50,32 +47,31 @@ audio_container_name       = "audio-container"
 transcripts_container_name = "transcripts-container"
 
 # Queue / Service Bus
-service_bus                     = "stt-aks-service-bus-prod"
-speech_queue                    = "stt-speech-queue"
-search_queue                    = "stt-search-queue"
-storage_queue                   = "stt-storage-queue"
-service_bus_encryption_key_name = "stt-sb-disk-encrypt-key"
+service_bus          = "stt-aks-service-bus-prod"
+speech_queue         = "stt-speech-queue"
+search_queue         = "stt-search-queue"
+storage_queue        = "stt-storage-queue"
+service_bus_uai_name = "uai-service-bus"
 
 # ACR 
-acr_name                = "acrsttprocessingprod"
-uai_acr_encryption_name = "uai-acr-encryption"
-uai_ci_cd_acr_name      = "ci-cd-acr-uai"
-api_worker_image        = "myacrprod.azurecr.io/api:prod"
-speech_worker_image     = "myacrprod.azurecr.io/speech-worker:prod"
-search_worker_image     = "myacrprod.azurecr.io/search-worker:prod"
-storage_worker_image    = "myacrprod.azurecr.io/storage-worker:prod"
+acr_name             = "acrsttprocessingprod"
+uai_acr_name         = "acr-uai"
+uai_ci_cd_acr_name   = "ci-cd-acr-uai"
+api_worker_image     = "myacrprod.azurecr.io/api:prod"
+speech_worker_image  = "myacrprod.azurecr.io/speech-worker:prod"
+search_worker_image  = "myacrprod.azurecr.io/search-worker:prod"
+storage_worker_image = "myacrprod.azurecr.io/storage-worker:prod"
 
 # AKS
 kubernetes_cluster_name = "stt-aks-cluster-prod"
 uai_aks_name            = "aks-uai-sttprocessing"
 
-aks_dns                      = "sttaksdns"
-aks_node_pool_name           = "aksnodepool"
-aks_node_scaling_min         = 1
-aks_node_scaling_max         = 3
-aks_node_size                = "standard_b2s"
-aks_node_os_disk_size        = 20
-aks_disk_encryption_key_name = "stt-aks-disk-encrypt-key"
+aks_dns               = "sttaksdns"
+aks_node_pool_name    = "aksnodepool"
+aks_node_scaling_min  = 1
+aks_node_scaling_max  = 3
+aks_node_size         = "standard_b2s"
+aks_node_os_disk_size = 30
 
 # K8's
 k8_environment        = "dev"
@@ -99,11 +95,11 @@ subnet_name_ingress    = "ingress-subnet"
 subnet_name_pe         = "private-endpoint-subnet"
 subnet_name_queue      = "message-queue-subnet"
 subnet_name_monitoring = "monitoring-subnet"
-subnet_name_acr        = "monitoring-subnet"
+subnet_name_acr        = "acr-subnet"
 
 # Private Endpoint
 private_endpoint_name_storage_pe = "stt-storage-pe"
-private_endpoint_name_speech_pe  = "stt-speech-pe"
+private_endpoint_name_speech_pe  = "stt-speech-pe-1"
 private_endpoint_name_search_pe  = "stt-speech-pe"
 private_endpoint_name_queue_pe   = "stt-queue-pe"
 private_endpoint_name_acr_pe     = "stt-acr-pe"
@@ -122,7 +118,7 @@ acr_dns_group_name     = "acr-dns"
 
 
 # Application Gateway
-app_gw_name                     = "app-gw-http-prod"
+app_gw_name                     = "app-gw-https-prod"
 app_gw_ip_config_name           = "appgw-ip-cfg"
 app_gw_frontend_ip_config_name  = "app-gw-frontend-ip"
 app_gw_aks_backend_pool_ip_name = "aks-backend-pool"
@@ -283,3 +279,4 @@ security_rules_ingress = [
     destination_address_prefix = "0.0.0.0/0"
   }
 ]
+
