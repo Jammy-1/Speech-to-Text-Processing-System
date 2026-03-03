@@ -28,6 +28,7 @@ module "cognitive" {
 
   # Speech
   cognitive_account_name   = var.cognitive_account_name
+  speech_subdomain_name    = var.speech_subdomain_name
   cognitive_account_uai_id = module.uai-rbac-fic.cognitive_account_uai_id
   pe_subnet_id             = module.network.pe_subnet_id
 

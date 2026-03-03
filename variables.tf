@@ -5,6 +5,7 @@ variable "tags" { type = map(string) }
 
 # Cognitive Speehc
 variable "cognitive_account_name" { type = string }
+variable "speech_subdomain_name" { type = string }
 variable "uai_name_cognitive_account" { type = string }
 
 # Search 

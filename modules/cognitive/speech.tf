@@ -8,7 +8,7 @@ resource "azurerm_cognitive_account" "speech_service" {
   kind     = "SpeechServices"
   sku_name = "S0"
 
-  custom_subdomain_name              = "stt-speech-01"
+  custom_subdomain_name              = var.speech_subdomain_name
   outbound_network_access_restricted = "true"
   public_network_access_enabled      = "false"
   local_auth_enabled                 = "true"
