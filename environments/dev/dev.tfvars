@@ -25,7 +25,6 @@ storage_log_name   = "storage-logs-stt-dev"
 key_vault_name          = "kv-stt-dev"
 uai_ci_cd_kv_admin_name = "kv-admin-uai-ci-cd"
 
-
 speech_key_name = "stt-speech-kv-key"
 search_key_name = "stt-search-key"
 
@@ -33,6 +32,7 @@ search_key_name = "stt-search-key"
 
 #Speech
 cognitive_account_name     = "stt-cognitive-speech-dev"
+speech_subdomain_name      = "stt-speech-dev"
 uai_name_cognitive_account = "uai-ca-speech-service"
 uai_speech_worker_name     = "uai-speech-worker"
 

@@ -33,6 +33,7 @@ search_key_name = "stt-search-key"
 
 #Speech
 cognitive_account_name     = "stt-cognitive-speech-prod"
+speech_subdomain_name      = "stt-speech-prod"
 uai_name_cognitive_account = "uai-ca-speech-service"
 uai_speech_worker_name     = "uai-speech-worker"
 
