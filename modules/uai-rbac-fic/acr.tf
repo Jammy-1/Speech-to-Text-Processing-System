@@ -18,3 +18,15 @@ resource "azurerm_role_assignment" "rbac_ci_cd_acr" {
   role_definition_name = "AcrPush"
   principal_id         = azurerm_user_assigned_identity.uai_ci_cd_acr_push.principal_id
 }
+
+resource "azurerm_federated_identity_credential" "github_ci_cd" {
+  name                = "acr-github-fic"
+  resource_group_name = var.resource_group_name
+  parent_id           = azurerm_user_assigned_identity.uai_ci_cd_acr_push.id
+
+  issuer  = "https://token.actions.githubusercontent.com"
+  subject = "repo:<ORG>/<REPO>:ref:refs/heads/main"
+
+  audience = ["api://AzureADTokenExchange"]
+}
+
