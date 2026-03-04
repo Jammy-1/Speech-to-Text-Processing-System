@@ -1,6 +1,12 @@
 name: Pipeline Pre-Deployment
 
 on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+
   workflow_dispatch:
     inputs:
       branch:
