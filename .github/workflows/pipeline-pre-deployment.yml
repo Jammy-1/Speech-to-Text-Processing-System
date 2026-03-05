@@ -1,4 +1,4 @@
-name: Pipeline Pre-Deployment
+name: Pipeline - Pre-Deployment
 
 on:
   workflow_call:
@@ -10,163 +10,183 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "Branch To Deploy ( dev | staging | main )"
-        required: true
+        description: "Branch To Run Workflow - Leave Empty For Current Branch"
+        required: false
         type: string
 
-permissions:
-  contents: read
+  pull_request:
+    branches:
+      - main
+    paths:
+      - modules/**
+      - environments/**
+      - main.tf
+      - variables.tf
 
 jobs:
-  # Terraform Format
-  terraform-format:
-    name: Terraform
-    uses: ./.github/workflows/terraform-format.yml
-    with:
-      branch: ${{ inputs.branch }}
-
-  # Terraform Validate
-  terraform-validate:
-    name: Terraform
-    uses: ./.github/workflows/terraform-validate.yml
-    with:
-      branch: ${{ inputs.branch }}
-
-  # Terraform Linting
-  terraform-linting:
-    name: Terraform
-    needs:
-      - terraform-format
-      - terraform-validate
-    uses: ./.github/workflows/terraform-linting.yml
-    with:
-      branch: ${{ inputs.branch }}
-
-  # Security - Checkov
-  Security-Checkov:
-    name: Security
-    needs: terraform-linting
-    uses: ./.github/workflows/security-checkov.yml
-    with:
-      branch: ${{ inputs.branch }}
-
-  # Security - Trivy IAC
-  Security-Trivy-IAC:
-    name: Security
-    needs: terraform-linting
-    uses: ./.github/workflows/security-trivy-iac.yml
-    with:
-      branch: ${{ inputs.branch }}
-
-  # Security - Trivy Secrets
-  Security-Trivy-Secrets:
-    name: Security
-    needs: terraform-linting
-    uses: ./.github/workflows/security-trivy-secrets.yml
-    with:
-      branch: ${{ inputs.branch }}
-
-  # Terraform Plan
-  terraform-plan:
-    name: Terraform
-    needs:
-      - Security-Checkov
-      - Security-Trivy-IAC
-      - Security-Trivy-Secrets
-    uses: ./.github/workflows/terraform-plan.yml
-    secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-    with:
-      branch: ${{ inputs.branch }}
-
-  # Terraform Remote Backend Checks
-  backend-remote-checks:
-    name: Backend
-    needs: terraform-plan
-    uses: ./.github/workflows/backend-remote-check.yml
-    with:
-      branch: ${{ inputs.branch }}
-    secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-  # Terraform Remote Backend Bootstrap
-  backend-remote-bootstrap:
-    name: Backend
-    needs: backend-remote-checks
-    if: ${{ needs.backend-remote-checks.outputs.backend_exists == 'false' }}
-    uses: ./.github/workflows/backend-remote-bootstrap.yml
-    with:
-      branch: ${{ inputs.branch }}
-    secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-  # Drift Detection After Remote-Backend Checks or Creation
-  drift-detection-backend:
-    name: Backend
-    needs:
-      - backend-remote-checks
-      - backend-remote-bootstrap
-    uses: ./.github/workflows/backend-drift-detection.yml
-    if: ${{
-      always() &&
-      needs.backend-remote-checks.result == 'success' &&
-      (
-      needs.backend-remote-checks.outputs.backend_exists == 'true' ||
-      needs.backend-remote-bootstrap.result == 'success' ||
-      needs.backend-remote-bootstrap.result == 'skipped'
-      )
-      }}
-    secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-    with:
-      branch: ${{ inputs.branch }}
-
-  drift-gate-backend:
-    name: Drift Gate Policy
+  Terraform-Static-Analysis:
     runs-on: ubuntu-latest
-    needs: drift-detection-backend
-    if: ${{ always() }}
+
     env:
-      DRIFT_STATUS: ${{ needs.drift-detection-backend.outputs.drift_status }}
-      DRIFT_EXIT_CODE: ${{ needs.drift-detection-backend.outputs.drift_exit_code }}
-      JOB_RESULT: ${{ needs.drift-detection-backend.result }}
+      TF_LOG: ERROR
+      INPUT_BRANCH: ${{ inputs.branch }}
+      DISPATCH_BRANCH: ${{ github.event.inputs.branch }}
+
+    outputs:
+      env_name: ${{ steps.detect-env.outputs.env }}
+      tfvars_file: ${{ steps.detect-env.outputs.tfvars }}
+
     steps:
-      - name: Evaluate Drift Result
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Version
+        run: terraform version
+
+      - name: Determine Branch & Environment
+        id: detect-env
+        shell: bash
         run: |
-          echo "Backend Drift Detection Result: $JOB_RESULT"
-          echo "Drift Status: '$DRIFT_STATUS'"
-          echo "Exit Code: '$DRIFT_EXIT_CODE'"
+          echo "Determining Branch & Environment..."
+           if [ "$GITHUB_EVENT_NAME" = "workflow_call" ]; then
+             BRANCH="$INPUT_BRANCH"
 
-          if [ "$JOB_RESULT" = "failure" ]; then
-            echo "Drift Detection Job Failed"
-            exit 1
-          fi
+           elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ -n "$DISPATCH_BRANCH" ]; then
+             BRANCH="$DISPATCH_BRANCH"
 
-          if [ -z "$DRIFT_STATUS" ]; then
-            echo "Drift Status Output Missing - Error"
-            exit 1
-          fi
+           elif [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+             BRANCH="$GITHUB_BASE_REF"
 
-          if [ "$DRIFT_STATUS" = "drift_detected" ]; then
-            echo "Drift Detected - Blocking Pipeline"
-            exit 1
+           else
+             BRANCH="${GITHUB_REF#refs/heads/}"
+           fi
 
-          elif [ "$DRIFT_STATUS" = "error" ]; then
-            echo "Terraform Error - Blocking Pipeline"
-            exit 1
+           echo "Branch: $BRANCH"
 
-          else
-            echo "No Drift Detected - Pipeline Continuing..."
-          fi
+           case "$BRANCH" in
+             dev) ENV="dev" ;;
+             staging) ENV="staging" ;;
+             main) ENV="production" ;;
+             *) echo "Invalid Branch: $BRANCH"; exit 1 ;;
+           esac
+
+           TFVARS_FILE="environments/${ENV}/${ENV}.tfvars"
+
+           echo "env=$ENV" >> $GITHUB_OUTPUT
+           echo "tfvars=$TFVARS_FILE" >> $GITHUB_OUTPUT
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        run: terraform validate
+
+  Terraform-Linting:
+    runs-on: ubuntu-latest
+    needs: Terraform-Static-Analysis
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Initialize Terraform
+        working-directory: .
+        run: |
+          echo "Initializing Terraform..."
+          terraform init -backend=false
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v6
+
+      - name: TFLint Config
+        run: |
+          cat <<EOF > .tflint.hcl
+          config {
+            format = "compact"
+          }
+
+          plugin "azurerm" {
+            enabled = true
+            source  = "github.com/terraform-linters/tflint-ruleset-azurerm"
+            version = "0.27.0"
+          }
+
+          rule "terraform_unused_declarations" {
+            enabled = true
+            level   = "WARNING"
+          }
+
+          rule "terraform_required_providers" {
+            enabled = true
+          }
+          EOF
+
+      - name: Initialize TFLint
+        run: tflint --init
+
+      - name: Run TFLint
+        run: tflint --format compact
+
+  Security:
+    runs-on: ubuntu-latest
+    needs: Terraform-Linting
+
+    env:
+      TFVARS_FILE: ${{ needs.Terraform-Static-Analysis.outputs.tfvars_file }}
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          framework: terraform
+          var_file: ${{ env.TFVARS_FILE }}
+          check: CKV_AZURE_*
+          soft_fail: false
+          output_format: cli
+          download_external_modules: true
+
+      - name: Install Trivy
+        run: |
+          echo "Installing Trivy Scanner"
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+          echo "Trivy Installed Successfully"
+          ./bin/trivy --version
+
+        # Trivy Scan - Secrets Scan
+      - name: Trivy Secrets Scan
+        run: |
+          echo "Running Trivy Secrets Scan..."
+          ./bin/trivy fs ./ \
+            --scanners secret \
+            --format table \
+            --severity CRITICAL,HIGH \
+            --exit-code 1
+          echo "Secrets Scan Completed"
+
+      # Clear Cache
+      - name: Clear Trivy Cache
+        run: |
+          echo "Clearing Trivy Cache"
+           rm -rf ~/.cache/trivy
+           echo "Cleanup Complete"
+
+        # Trivy Scan - Root Modules
+      - name: Trivy IAC Scan
+        run: |
+          echo "Running Trivy Module IAC Scan..."
+          ./bin/trivy config . \
+            --tf-vars ${{ env.TFVARS_FILE }} \
+            --skip-dirs environments/terraform-backend \
+            --format table \
+            --severity CRITICAL,HIGH || true
+            echo "Terraform Config Scan Completed"
