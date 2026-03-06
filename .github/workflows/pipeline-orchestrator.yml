@@ -18,3 +18,11 @@ jobs:
     uses: ./.github/workflows/pipeline-pre-deployment.yml
     with:
       branch: ${{ inputs.branch }}
+
+  # Terraform Remote Backend Check
+  Terraform-Backend-Checks:
+    name: Terraform Backend Checks
+    needs: Pre-Deployment
+    uses: ./.github/workflows/backend-remote-check.yml
+    with:
+      branch: ${{ inputs.branch }}
