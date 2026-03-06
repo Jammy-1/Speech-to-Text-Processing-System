@@ -4,6 +4,7 @@ output "speech_worker_uai_principal_id" { value = azurerm_user_assigned_identity
 
 # Search 
 output "uai_search_service_id" { value = azurerm_user_assigned_identity.search_service_uai.id }
+output "uai_speech_worker_client_id" { value = azurerm_user_assigned_identity.speech_worker_uai.client_id }
 output "search_index_rbac_id" { value = azurerm_role_assignment.rbac_search_index_contributor.id }
 output "rdef_search_index_data_contributor_name" { value = data.azurerm_role_definition.rdef_search_index_data_contributor.name }
 
