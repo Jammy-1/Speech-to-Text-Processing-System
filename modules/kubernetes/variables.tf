@@ -8,6 +8,9 @@ variable "k8_label_project_name" { type = string }
 #  API
 variable "uai_api_worker_client_id" { type = string }
 
+# Key Vault
+variable "key_vault_name" { type = string }
+
 # Storage 
 variable "storage_account_name" { type = string }
 variable "storage_queue" { type = string }
@@ -21,7 +24,7 @@ variable "service_bus_name" { type = string }
 variable "service_bus_namespace" { type = string }
 
 # Speech 
-variable "speech_key" { type = string }
+variable "uai_speech_worker_client_id" { type = string }
 variable "speech_queue" { type = string }
 variable "speech_queue_id" { type = string }
 variable "uai_speech_worker_name" { type = string }
