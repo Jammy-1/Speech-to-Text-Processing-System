@@ -12,7 +12,6 @@ resource "kubernetes_namespace_v1" "speech" {
   }
 }
 
-
 # Configuration Map - Speech
 resource "kubernetes_config_map_v1" "speech_config_map" {
   metadata {
@@ -31,32 +30,48 @@ resource "kubernetes_config_map_v1" "speech_config_map" {
   }
 }
 
-# Secret - Speech
-resource "kubernetes_secret_v1" "speech_secret" {
-  metadata {
-    name      = "speech-secrets"
-    namespace = kubernetes_namespace_v1.speech.metadata[0].name
-  }
-
-  data = {
-    SPEECH_KEY = var.speech_key
-  }
-
-  type = "Opaque"
-}
-
 # Service Account
 resource "kubernetes_service_account_v1" "speech_worker_sa" {
   metadata {
     name      = "speech-worker-sa"
     namespace = kubernetes_namespace_v1.speech.metadata[0].name
 
-    labels = {
-      "azure.workload.identity/use" = "true"
+    labels = { "azure.workload.identity/use" = "true" }
+    annotations = { "azure.workload.identity/client-id" = var.uai_speech_worker_client_id }
+  }
+}
+
+# Key Vault - Speech
+data "azurerm_client_config" "kv_tennant_id" {}
+resource "kubernetes_manifest" "speech_keyvault_provider" {
+
+  manifest = {
+    apiVersion = "secrets-store.csi.x-k8s.io/v1"
+    kind       = "SecretProviderClass"
+
+    metadata = {
+      name      = "speech-keyvault"
+      namespace = kubernetes_namespace_v1.speech.metadata[0].name
     }
 
-    annotations = {
-      "azure.workload.identity/client-id" = var.uai_speech_worker_name
+    spec = {
+      provider = "azure"
+
+      parameters = {
+        usePodIdentity       = "false"
+        useVMManagedIdentity = "false"
+
+        clientID     = var.uai_speech_worker_client_id
+        keyvaultName = var.key_vault_name
+        tenantId     = data.azurerm_client_config.kv_tennant_id.tenant_id
+
+        objects = <<YAML
+      array:
+        - |
+          objectName: speech-key
+          objectType: secret
+      YAML
+      }
     }
   }
 }
@@ -75,43 +90,67 @@ resource "kubernetes_deployment_v1" "speech_worker" {
       match_labels = { app = "speech-worker" }
     }
 
-    template {
-      metadata {
-        labels = { app = "speech-worker" }
+  template {
+
+    metadata {
+    labels = {
+      app = "speech-worker"
+    }
+
+    annotations = { "azure.workload.identity/use" = "true" }
+  }
+  spec {
+
+    service_account_name = kubernetes_service_account_v1.speech_worker_sa.metadata[0].name
+
+    container {
+      name              = "speech-worker"
+      image             = var.speech_worker_image
+      image_pull_policy = "Always"
+
+      resources {
+        requests = {
+          cpu    = "500m"
+          memory = "1Gi"
+        }
+        limits = {
+          cpu    = "1"
+          memory = "2Gi"
+        }
       }
 
-      spec {
-        service_account_name = kubernetes_namespace_v1.speech.metadata[0].name
+      env_from {
+        config_map_ref {
+          name = kubernetes_config_map_v1.speech_config_map.metadata[0].name
+        }
+      }
 
-        container {
-          name              = "speech-worker"
-          image             = var.speech_worker_image
-          image_pull_policy = "Always"
+      env {
+        name  = "SPEECH_KEY_PATH"
+        value = "/mnt/secrets-store/speech-key"
+      }
 
-          resources {
-            requests = {
-              cpu    = "500m"
-              memory = "1Gi"
-            }
-            limits = {
-              cpu    = "1"
-              memory = "2Gi"
-            }
-          }
+      volume_mount {
+        name       = "keyvault-secrets"
+        mount_path = "/mnt/secrets-store"
+        read_only  = true
+      }
+    }
 
-          env_from {
-            config_map_ref {
-              name = kubernetes_config_map_v1.speech_config_map.metadata[0].name
-            }
-          }
+    volume {
+      name = "keyvault-secrets"
 
-          env_from {
-            secret_ref {
-              name = kubernetes_secret_v1.speech_secret.metadata[0].name
+      csi {
+        driver    = "secrets-store.csi.k8s.io"
+        read_only = true
+
+        volume_attributes = {
+          secretProviderClass = "speech-keyvault"
             }
           }
         }
+
       }
-    }
-  }
-}
+    } 
+  } 
+} 
