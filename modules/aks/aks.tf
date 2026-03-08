@@ -47,5 +47,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
     labels_allowed      = null
   }
 
+  key_vault_secrets_provider {
+    secret_rotation_enabled  = true
+    secret_rotation_interval = "60m"
+  }
+
   oms_agent { log_analytics_workspace_id = var.log_workspace_id }
 }
