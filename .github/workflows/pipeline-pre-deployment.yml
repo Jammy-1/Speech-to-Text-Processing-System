@@ -1,4 +1,4 @@
-name: Pipeline - Pre-Deployment
+name: Pipeline - Pre Deployment
 
 on:
   workflow_call:
@@ -94,6 +94,9 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
       - name: Initialize Terraform
         working-directory: .
