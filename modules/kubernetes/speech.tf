@@ -36,7 +36,7 @@ resource "kubernetes_service_account_v1" "speech_worker_sa" {
     name      = "speech-worker-sa"
     namespace = kubernetes_namespace_v1.speech.metadata[0].name
 
-    labels = { "azure.workload.identity/use" = "true" }
+    labels      = { "azure.workload.identity/use" = "true" }
     annotations = { "azure.workload.identity/client-id" = var.uai_speech_worker_client_id }
   }
 }
@@ -90,67 +90,67 @@ resource "kubernetes_deployment_v1" "speech_worker" {
       match_labels = { app = "speech-worker" }
     }
 
-  template {
+    template {
 
-    metadata {
-    labels = {
-      app = "speech-worker"
-    }
-
-    annotations = { "azure.workload.identity/use" = "true" }
-  }
-  spec {
-
-    service_account_name = kubernetes_service_account_v1.speech_worker_sa.metadata[0].name
-
-    container {
-      name              = "speech-worker"
-      image             = var.speech_worker_image
-      image_pull_policy = "Always"
-
-      resources {
-        requests = {
-          cpu    = "500m"
-          memory = "1Gi"
+      metadata {
+        labels = {
+          app = "speech-worker"
         }
-        limits = {
-          cpu    = "1"
-          memory = "2Gi"
+
+        annotations = { "azure.workload.identity/use" = "true" }
+      }
+      spec {
+
+        service_account_name = kubernetes_service_account_v1.speech_worker_sa.metadata[0].name
+
+        container {
+          name              = "speech-worker"
+          image             = var.speech_worker_image
+          image_pull_policy = "Always"
+
+          resources {
+            requests = {
+              cpu    = "500m"
+              memory = "1Gi"
+            }
+            limits = {
+              cpu    = "1"
+              memory = "2Gi"
+            }
+          }
+
+          env_from {
+            config_map_ref {
+              name = kubernetes_config_map_v1.speech_config_map.metadata[0].name
+            }
+          }
+
+          env {
+            name  = "SPEECH_KEY_PATH"
+            value = "/mnt/secrets-store/speech-primary-key"
+          }
+
+          volume_mount {
+            name       = "keyvault-secrets"
+            mount_path = "/mnt/secrets-store"
+            read_only  = true
+          }
         }
-      }
 
-      env_from {
-        config_map_ref {
-          name = kubernetes_config_map_v1.speech_config_map.metadata[0].name
-        }
-      }
+        volume {
+          name = "keyvault-secrets"
 
-      env {
-        name  = "SPEECH_KEY_PATH"
-        value = "/mnt/secrets-store/speech-key"
-      }
+          csi {
+            driver    = "secrets-store.csi.k8s.io"
+            read_only = true
 
-      volume_mount {
-        name       = "keyvault-secrets"
-        mount_path = "/mnt/secrets-store"
-        read_only  = true
-      }
-    }
-
-    volume {
-      name = "keyvault-secrets"
-
-      csi {
-        driver    = "secrets-store.csi.k8s.io"
-        read_only = true
-
-        volume_attributes = {
-          secretProviderClass = "speech-keyvault"
+            volume_attributes = {
+              secretProviderClass = "speech-keyvault"
             }
           }
         }
 
       }
-    } 
-  } 
+    }
+  }
 } 
