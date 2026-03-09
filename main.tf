@@ -13,7 +13,9 @@ module "storage" {
   location            = var.location
   tags                = var.tags
 
-  storage_account_name = var.storage_account_name
+  storage_account_name       = var.storage_account_name
+  transcripts_container_name = var.transcripts_container_name
+  audio_container_name       = var.audio_container_name
 
   # Network
   pe_subnet_id = module.network.pe_subnet_id
@@ -34,6 +36,7 @@ module "cognitive" {
 
   #Search
   search_service_name   = var.search_service_name
+  search_index_name     = var.search_index_name
   search_service_uai_id = module.uai-rbac-fic.uai_search_service_id
 
   # Access
