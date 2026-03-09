@@ -5,6 +5,8 @@ variable "tags" { type = map(string) }
 
 # Storage 
 variable "storage_account_name" { type = string }
+variable "audio_container_name" { type = string }
+variable "transcripts_container_name" { type = string }
 
 # Subnet 
 variable "pe_subnet_id" { type = string }

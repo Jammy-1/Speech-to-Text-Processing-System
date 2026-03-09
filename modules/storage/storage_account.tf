@@ -20,14 +20,15 @@ resource "azurerm_storage_account" "storage_account" {
 
 # Container - Audio 
 resource "azurerm_storage_container" "audio" {
-  name                  = "audio"
+  name                  = var.audio_container_name
   storage_account_id    = azurerm_storage_account.storage_account.id
   container_access_type = "private"
 }
 
 # Container - Transcripts
 resource "azurerm_storage_container" "transcripts" {
-  name                  = "transcripts"
+  name                  = var.transcripts_container_name
   storage_account_id    = azurerm_storage_account.storage_account.id
   container_access_type = "private"
 }
+
