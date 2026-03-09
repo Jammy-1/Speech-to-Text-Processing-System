@@ -12,6 +12,7 @@ variable "pe_subnet_id" { type = string }
 # Search
 variable "search_service_name" { type = string }
 variable "search_service_uai_id" { type = string }
+variable "search_index_name" { type = string }
 
 # Key Vault
 variable "key_vault_id" { type = string }

@@ -32,7 +32,7 @@ resource "azurerm_search_service" "search_service" {
 resource "azapi_data_plane_resource" "transcripts_index" {
   type      = "Microsoft.Search/searchServices/indexes@2024-07-01"
   parent_id = "${azurerm_search_service.search_service.name}.search.windows.net"
-  name      = "transcripts-index"
+  name      = var.search_index_name
   body = {
     fields = [
       { name = "chunk_id", type = "Edm.String", key = true, filterable = false },
