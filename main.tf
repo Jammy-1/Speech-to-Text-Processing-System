@@ -193,6 +193,9 @@ module "k8" {
   k8_environment        = var.k8_environment
   k8_label_project_name = var.k8_label_project_name
 
+  # Key Vault
+  key_vault_name = module.key-vault.key_vault_name
+
   # API
   uai_api_worker_client_id = module.uai-rbac-fic.uai_api_worker_client_id
 
@@ -207,9 +210,9 @@ module "k8" {
   search_index_name      = module.cognitive.transcripts_index_name
 
   # Speech
-  speech_key             = module.cognitive.speech_primary_key
-  speech_queue_id        = module.cognitive.speech_id
-  uai_speech_worker_name = var.uai_speech_worker_name
+  speech_queue_id             = module.cognitive.speech_id
+  uai_speech_worker_name      = var.uai_speech_worker_name
+  uai_speech_worker_client_id = module.uai-rbac-fic.uai_speech_worker_client_id
 
   # Search
   uai_search_worker_name = var.uai_search_service_name
