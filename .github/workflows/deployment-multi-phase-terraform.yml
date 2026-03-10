@@ -21,8 +21,6 @@ on:
 
   pull_request:
     branches:
-      - dev
-      - staging
       - main
     paths:
       - modules/**
