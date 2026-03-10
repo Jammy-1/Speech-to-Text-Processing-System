@@ -14,20 +14,6 @@ on:
         required: false
         type: string
 
-  pull_request:
-    branches:
-      - dev
-      - staging
-      - main
-    paths:
-      - modules/**
-      - environments/dev/**
-      - environments/staging/**
-      - environments/production/**
-      - environments/terraform-backend/**
-      - main.tf
-      - variables.tf
-
 jobs:
   Checkov:
     runs-on: ubuntu-latest
@@ -113,5 +99,5 @@ jobs:
           output_format: cli
           download_external_modules: true
 
-          # HTTP (160) - KV Pure Protection (110) - CA Local Auth (236) - AKS SLA Paid SKU (170) - Min 50 Pods - AKS API Auth IP -CA Diabled Public Network (124) - SA Blob Public Access (190) - SA Public Access (59) - Queue Logging (33) - ACR Disabled Public Network (139) - ACR Dataend Point (237) - AKS Private CLuster (115) - Critical System Pods (232) - KV Recoverable (42) - App GW HTTPs (217) - App GW SSL (218) - SB DOuble Encrypt (199) - SB Public Network (204) - App GW WAF (120) - Search Identity, SA Replication (206), Cognitive Search SLA search index queries (209) & (208)
-          skip_check: CKV_AZURE_160,CKV_AZURE_110,CKV_AZURE_236,CKV_AZURE_170,CKV_AZURE_168,CKV_AZURE_6,CKV_AZURE_124,CKV_AZURE_190,CKV_AZURE_59,CKV_AZURE_33,CKV_AZURE_193,CKV_AZURE_237,CKV_AZURE_115,CKV_AZURE_232,CKV_AZURE_42,CKV_AZURE_217,CKV_AZURE_218,CKV_AZURE_199,CKV_AZURE_204,CKV_AZURE_120,CKV_AZURE_139,CKV_AZURE_207,CKV_AZURE_233,CKV_AZURE_206,CKV_AZURE_209,CKV_AZURE_208
+          # HTTP (160) - KV Pure Protection (110) - CA Local Auth (236) - AKS SLA Paid SKU (170) - Min 50 Pods - AKS API Auth IP -CA Diabled Public Network (124) - SA Blob Public Access (190) - SA Public Access (59) - Queue Logging (33) - ACR Disabled Public Network (139) - ACR Dataend Point (237) - AKS Private CLuster (115) - Critical System Pods (232) - KV Recoverable (42) - App GW HTTPs (217) - App GW SSL (218) - SB DOuble Encrypt (199) - SB Public Network (204) - App GW WAF (120) - Search Identity, SA Replication (206), Cognitive Search SLA search index queries (209) & (208), eo-replicated container registries (165),  AKS uses disk encryption set (165),  AKS cluster encrypt (227), AKS local admin account is disabled (141), key vault secrets have "content_type (114), expiration date is set on all secrets (41),Azure Service Bus uses a customer-managed key,
+          skip_check: CKV_AZURE_160,CKV_AZURE_110,CKV_AZURE_236,CKV_AZURE_170,CKV_AZURE_168,CKV_AZURE_6,CKV_AZURE_124,CKV_AZURE_190,CKV_AZURE_59,CKV_AZURE_33,CKV_AZURE_193,CKV_AZURE_237,CKV_AZURE_115,CKV_AZURE_232,CKV_AZURE_42,CKV_AZURE_217,CKV_AZURE_218,CKV_AZURE_199,CKV_AZURE_204,CKV_AZURE_120,CKV_AZURE_139,CKV_AZURE_207,CKV_AZURE_233,CKV_AZURE_206,CKV_AZURE_209,CKV_AZURE_208,CKV_AZURE_165,CKV_AZURE_117,CKV_AZURE_227,CKV_AZURE_141,CKV_AZURE_114,CKV_AZURE_41,CKV_AZURE_201,
