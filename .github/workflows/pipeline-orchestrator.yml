@@ -1,0 +1,180 @@
+name: Pipeline Orchestrator
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch To Deploy ( dev | staging | main )"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  # Terraform Format
+  terraform-format:
+    name: Terraform
+    uses: ./.github/workflows/terraform-format.yml
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Terraform Validate
+  terraform-validate:
+    name: Terraform
+    uses: ./.github/workflows/terraform-validate.yml
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Terraform Linting
+  terraform-linting:
+    name: Terraform
+    needs:
+      - terraform-format
+      - terraform-validate
+    uses: ./.github/workflows/terraform-linting.yml
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Security - Checkov
+  Security-Checkov:
+    name: Security
+    needs: terraform-linting
+    uses: ./.github/workflows/security-checkov.yml
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Security - Trivy IAC
+  Security-Trivy-IAC:
+    name: Security
+    needs: terraform-linting
+    uses: ./.github/workflows/security-trivy-iac.yml
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Security - Trivy Secrets
+  Security-Trivy-Secrets:
+    name: Security
+    needs: terraform-linting
+    uses: ./.github/workflows/security-trivy-secrets.yml
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Terraform Plan
+  terraform-plan:
+    name: Terraform
+    needs:
+      - Security-Checkov
+      - Security-Trivy-IAC
+      - Security-Trivy-Secrets
+    uses: ./.github/workflows/terraform-plan.yml
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Terraform Remote Backend Checks
+  backend-remote-checks:
+    name: Backend
+    needs: terraform-plan
+    uses: ./.github/workflows/backend-remote-check.yml
+    with:
+      branch: ${{ inputs.branch }}
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+  # Terraform Remote Backend Bootstrap
+  backend-remote-bootstrap:
+    name: Backend
+    needs: backend-remote-checks
+    if: ${{ needs.backend-remote-checks.outputs.backend_exists == 'false' }}
+    uses: ./.github/workflows/backend-remote-bootstrap.yml
+    with:
+      branch: ${{ inputs.branch }}
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+  # Drift Detection After Remote-Backend Checks or Creation
+  drift-detection-backend:
+    name: Backend
+    needs:
+      - backend-remote-checks
+      - backend-remote-bootstrap
+    uses: ./.github/workflows/backend-drift-detection.yml
+    if: ${{
+      always() &&
+      needs.backend-remote-checks.result == 'success' &&
+      (
+      needs.backend-remote-checks.outputs.backend_exists == 'true' ||
+      needs.backend-remote-bootstrap.result == 'success' ||
+      needs.backend-remote-bootstrap.result == 'skipped'
+      )
+      }}
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    with:
+      branch: ${{ inputs.branch }}
+
+  drift-gate-backend:
+    name: Drift Gate Policy
+    runs-on: ubuntu-latest
+    needs: drift-detection-backend
+    if: ${{ always() }}
+    env:
+      DRIFT_STATUS: ${{ needs.drift-detection-backend.outputs.drift_status }}
+      DRIFT_EXIT_CODE: ${{ needs.drift-detection-backend.outputs.drift_exit_code }}
+      JOB_RESULT: ${{ needs.drift-detection-backend.result }}
+    steps:
+      - name: Evaluate Drift Result
+        run: |
+          echo "Backend Drift Detection Result: $JOB_RESULT"
+          echo "Drift Status: '$DRIFT_STATUS'"
+          echo "Exit Code: '$DRIFT_EXIT_CODE'"
+
+          if [ "$JOB_RESULT" = "failure" ]; then
+            echo "Drift Detection Job Failed"
+            exit 1
+          fi
+
+          if [ -z "$DRIFT_STATUS" ]; then
+            echo "Drift Status Output Missing - Error"
+            exit 1
+          fi
+
+          if [ "$DRIFT_STATUS" = "drift_detected" ]; then
+            echo "Drift Detected - Blocking Pipeline"
+            exit 1
+
+          elif [ "$DRIFT_STATUS" = "error" ]; then
+            echo "Terraform Error - Blocking Pipeline"
+            exit 1
+
+          else
+            echo "No Drift Detected - Pipeline Continuing..."
+          fi
+
+  # Infrastructure Deployment
+  Infrastructure-Deployment:
+    name: Deployment
+    needs: drift-gate-backend
+    uses: ./.github/workflows/deployment-multi-phase-terraform.yml
+    with:
+      branch: ${{ inputs.branch }}
