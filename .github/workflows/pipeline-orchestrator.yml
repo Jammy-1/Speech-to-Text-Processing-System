@@ -172,9 +172,17 @@ jobs:
           fi
 
   # Infrastructure Deployment
-  Infrastructure-Deployment:
+  Deployment-Core-Multi-Phase:
     name: Deployment
     needs: drift-gate-backend
     uses: ./.github/workflows/deployment-multi-phase-terraform.yml
+    with:
+      branch: ${{ inputs.branch }}
+
+  # Infrastructure Deployment
+  Deployment-Kubernetes:
+    name: Deployment
+    needs: Deployment-Core-Multi-Phase
+    uses: ./.github/workflows/deployment-kubernetes.yml
     with:
       branch: ${{ inputs.branch }}
