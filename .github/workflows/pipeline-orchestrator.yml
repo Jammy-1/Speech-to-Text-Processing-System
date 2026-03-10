@@ -134,7 +134,7 @@ jobs:
       branch: ${{ inputs.branch }}
 
   drift-gate-backend:
-    name: Drift Gate Policy
+    name: Backend Drift Gate Conditional
     runs-on: ubuntu-latest
     needs: drift-detection-backend
     if: ${{ always() }}
@@ -172,7 +172,7 @@ jobs:
           fi
 
   # Infrastructure Deployment
-  Deployment-Core-Multi-Phase:
+  deployment-core-multi-phase:
     name: Deployment
     needs: drift-gate-backend
     uses: ./.github/workflows/deployment-multi-phase-terraform.yml
@@ -180,9 +180,9 @@ jobs:
       branch: ${{ inputs.branch }}
 
   # Infrastructure Deployment
-  Deployment-Kubernetes:
+  deployment-kubernetes:
     name: Deployment
-    needs: Deployment-Core-Multi-Phase
+    needs: deployment-core-multi-phase
     uses: ./.github/workflows/deployment-kubernetes.yml
     with:
       branch: ${{ inputs.branch }}
