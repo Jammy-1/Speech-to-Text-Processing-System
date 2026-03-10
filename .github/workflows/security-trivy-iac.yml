@@ -112,3 +112,4 @@ jobs:
             --skip-dirs environments/terraform-backend \
             --format table \
             --severity CRITICAL,HIGH || true
+            echo "Terraform Config Scan Completed"
