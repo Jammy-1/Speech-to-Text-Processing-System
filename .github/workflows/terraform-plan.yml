@@ -135,19 +135,17 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform plan \
+            -target=module.resource_group \
+            -target=module.network \
+            -target=module.log-analytics \
+            -target=module.uai-rbac-fic \
+            -target=module.key-vault \
+            -target=module.storage \
+            -target=module.queue \
+            -target=module.acr \
+            -target=module.cognitive \
+            -target=module.aks \
             -var-file="${TFVARS_FILE}"
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-      # Terraform Plan - Output TXT
-      - name: Terraform Plan TXT
-        run: |
-          terraform plan \
-            -var-file="${TFVARS_FILE}" \
-            -no-color > TF-Plan-Output.txt
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
