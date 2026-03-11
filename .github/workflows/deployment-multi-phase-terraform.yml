@@ -11,6 +11,15 @@ on:
       AZURE_CLIENT_SECRET:
       AZURE_SUBSCRIPTION_ID:
       AZURE_TENANT_ID:
+    outputs:
+      env_name:
+        value: ${{ jobs.Multi-Phased-Terraform-Deployment.outputs.env_name }}
+      phase1_status:
+        value: ${{ jobs.Multi-Phased-Terraform-Deployment.outputs.phase1_status }}
+      phase2_status:
+        value: ${{ jobs.Multi-Phased-Terraform-Deployment.outputs.phase2_status }}
+      phase3_status:
+        value: ${{ jobs.Multi-Phased-Terraform-Deployment.outputs.phase3_status }}
 
   workflow_dispatch:
     inputs:
