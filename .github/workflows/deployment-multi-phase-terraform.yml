@@ -202,6 +202,7 @@ jobs:
       # Terraform Plan - Phase 1 - Core Infrastructure
       - name: Terraform Apply - Phase 1 - Core Infrastructure
         id: phase1
+        continue-on-error: true
         working-directory: .
         run: |
           terraform apply -auto-approve \
@@ -218,6 +219,7 @@ jobs:
         # Terraform Plan - Phase 2 - Identity, Security & Storage
       - name: Terraform Apply - Phase 2 - Identity, Security & Storage
         id: phase2
+        continue-on-error: true
         working-directory: .
         run: |
           terraform apply -auto-approve \
@@ -235,6 +237,7 @@ jobs:
           # Terraform Plan - Phase 3 - Platform
       - name: Terraform Apply - Phase 3 - Platform
         id: phase3
+        continue-on-error: true
         working-directory: .
         run: |
           terraform apply -auto-approve \
