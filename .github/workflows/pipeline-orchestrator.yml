@@ -171,6 +171,8 @@ jobs:
             echo "No Drift Detected - Pipeline Continuing..."
           fi
 
+  # Deployment
+
   # Infrastructure Deployment
   deployment-core-multi-phase:
     name: Deployment
@@ -179,10 +181,19 @@ jobs:
     with:
       branch: ${{ inputs.branch }}
 
-  # Infrastructure Deployment
-  deployment-kubernetes:
-    name: Deployment
+  deployment-phase-status:
+    name: Deployment Status
     needs: deployment-core-multi-phase
-    uses: ./.github/workflows/deployment-kubernetes.yml
-    with:
-      branch: ${{ inputs.branch }}
+    runs-on: ubuntu-latest
+    outputs:
+      env_name: ${{ needs.deployment-core-multi-phase.outputs.env_name }}
+      phase1_status: ${{ needs.deployment-core-multi-phase.outputs.phase1_status }}
+      phase2_status: ${{ needs.deployment-core-multi-phase.outputs.phase2_status }}
+      phase3_status: ${{ needs.deployment-core-multi-phase.outputs.phase3_status }}
+    steps:
+      - name: Phase Status
+        run: |
+          echo "Environment    : ${{ needs.deployment-core-multi-phase.outputs.env_name }}"
+          echo "Phase 1 Status : ${{ needs.deployment-core-multi-phase.outputs.phase1_status }}"
+          echo "Phase 2 Status : ${{ needs.deployment-core-multi-phase.outputs.phase2_status }}"
+          echo "Phase 3 Status : ${{ needs.deployment-core-multi-phase.outputs.phase3_status }}"
