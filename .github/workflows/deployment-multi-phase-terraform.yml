@@ -6,6 +6,9 @@ on:
       branch:
         required: true
         type: string
+      phase:
+        required: false
+        type: string
     secrets:
       AZURE_CLIENT_ID:
       AZURE_CLIENT_SECRET:
