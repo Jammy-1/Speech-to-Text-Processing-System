@@ -1,4 +1,4 @@
-name: Deployment - Drift Detection
+name: Deployment - Drift Detection - All Modules
 
 on:
   workflow_call:
