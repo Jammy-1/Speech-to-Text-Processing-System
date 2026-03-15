@@ -241,24 +241,29 @@ jobs:
         id: drift-result
         run: |
 
-          p1="${{ steps.phase1.outputs.phase1_exit_code }}"
-          p2="${{ steps.phase2.outputs.phase2_exit_code }}"
-          p3="${{ steps.phase3.outputs.phase3_exit_code }}"
+          p1="${{ steps.phase1.outputs.exit_code }}"
+          p2="${{ steps.phase2.outputs.exit_code }}"
+          p3="${{ steps.phase3.outputs.exit_code }}"
 
+          echo "Drift Summary"
+          echo "-------------"
           echo "Phase1 exit: $p1"
           echo "Phase2 exit: $p2"
           echo "Phase3 exit: $p3"
 
           if [ "$p1" = "2" ] || [ "$p2" = "2" ] || [ "$p3" = "2" ]; then
+                echo "Result: DRIFT DETECTED"
                 echo "drift_status=drift_detected" >> $GITHUB_OUTPUT
                 echo "exit_code=2" >> $GITHUB_OUTPUT
 
               elif [ "$p1" = "1" ] || [ "$p2" = "1" ] || [ "$p3" = "1" ]; then
+                echo "Result : ERROR"
                 echo "drift_status=error" >> $GITHUB_OUTPUT
                 echo "exit_code=1" >> $GITHUB_OUTPUT
                 exit 1
 
               else
+                echo "Result : NO DRIFT"
                 echo "drift_status=no_drift" >> $GITHUB_OUTPUT
                 echo "exit_code=0" >> $GITHUB_OUTPUT
               fi
