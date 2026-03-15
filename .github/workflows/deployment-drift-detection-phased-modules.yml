@@ -176,7 +176,8 @@ jobs:
             -target=module.network \
             -target=module.log-analytics \
             -var-file="$TFVARS_FILE" \
-            -detailed-exitcode
+            -detailed-exitcode \
+            -no-color > /dev/null
 
           exit_code=$?
 
@@ -199,7 +200,8 @@ jobs:
             -target=module.storage \
             -target=module.queue \
             -var-file="$TFVARS_FILE" \
-            -detailed-exitcode
+            -detailed-exitcode \
+            -no-color > /dev/null
 
           exit_code=$?
 
@@ -221,7 +223,8 @@ jobs:
             -target=module.cognitive \
             -target=module.aks \
             -var-file="$TFVARS_FILE" \
-            -detailed-exitcode
+            -detailed-exitcode \
+            -no-color > /dev/null
 
           exit_code=$?
 
