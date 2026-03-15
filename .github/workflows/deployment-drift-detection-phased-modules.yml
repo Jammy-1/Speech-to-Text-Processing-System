@@ -70,7 +70,7 @@ jobs:
             *) echo "Invalid Branch: $BRANCH"; exit 1 ;;
             esac
 
-          TFVARS_FILE="environments/${ENV}/backend.tfvars"
+          TFVARS_FILE="environments/${ENV}/${ENV}.tfvars"
 
           echo "ENV=$ENV" >> $GITHUB_ENV
           echo "TFVARS_FILE=$TFVARS_FILE" >> $GITHUB_ENV
@@ -79,21 +79,10 @@ jobs:
           echo "Environment: $ENV"
           echo "Using TFVARS File: $TFVARS_FILE"
 
-        # Terraform Backend Folders & Files
-      - name: Terraform Backend Folders & Files
-        run: |
-          echo "Terraform Backend Folders & Files:"
-          for dir in environments/terraform-backend/*; do
-            if [ -d "$dir" ]; then
-              echo "Folder: $dir"
-              ls -1 "$dir"
-            fi
-          done
-
       # Determine Backend Variables
       - name: Determine Backend Variables
         run: |
-          BACKEND_FILE="${TFVARS_FILE}"
+          BACKEND_FILE="environments/${ENV}/backend.tfvars"
 
           if [ ! -f "$BACKEND_FILE" ]; then
            echo "Backend TFVARS File Not Found: $BACKEND_FILE"
@@ -114,6 +103,29 @@ jobs:
            echo "STORAGE_ACCOUNT_NAME=$SA" >> $GITHUB_ENV
            echo "STORAGE_CONTAINER_NAME=$CONTAINER" >> $GITHUB_ENV
            echo "STATE_KEY_DEPLOYMENT=$KEY" >> $GITHUB_ENV
+
+        # Terraform Backend Folders & Files
+      - name: Terraform Backend Folders & Files
+        run: |
+          echo "Terraform Backend Folders & Files:"
+          for dir in environments/terraform-backend/*; do
+            if [ -d "$dir" ]; then
+              echo "Folder: $dir"
+              ls -1 "$dir"
+            fi
+          done
+
+      # Backend Variables
+      - name: Backend Variables
+        run: |
+          echo "Resource Group Name       : ${{ env.RG_NAME }}"
+          echo "Storage Account Name      : ${{ env.STORAGE_ACCOUNT_NAME }}"
+          echo "Storage Container Name    : ${{ env.STORAGE_CONTAINER_NAME }}"
+          echo "Terraform Deployment State Key : ${{ env.STATE_KEY_DEPLOYMENT }}"
+
+        # Modules
+      - name: List Module Folders
+        run: ls -l modules/
 
         # Clear Cahce
       - name: Clear Cache
