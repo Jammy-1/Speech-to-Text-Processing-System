@@ -17,6 +17,24 @@ on:
       drift_exit_code:
         value: ${{ jobs.Drift-Detection.outputs.drift_exit_code }}
 
+      phase1_drift_status:
+        value: ${{ jobs.Drift-Detection.outputs.phase1_drift_status }}
+
+      phase2_drift_status:
+        value: ${{ jobs.Drift-Detection.outputs.phase2_drift_status }}
+
+      phase3_drift_status:
+        value: ${{ jobs.Drift-Detection.outputs.phase3_drift_status }}
+
+      phase1_drift_exit_code:
+        value: ${{ jobs.Drift-Detection.outputs.phase1_drift_exit_code }}
+
+      phase2_drift_exit_code:
+        value: ${{ jobs.Drift-Detection.outputs.phase2_drift_exit_code }}
+
+      phase3_drift_exit_code:
+        value: ${{ jobs.Drift-Detection.outputs.phase3_drift_exit_code }}
+
   workflow_dispatch:
     inputs:
       branch:
@@ -36,6 +54,15 @@ jobs:
       env_name: ${{ steps.detect-env.outputs.env }}
       drift_status: ${{ steps.drift-result.outputs.drift_status }}
       drift_exit_code: ${{ steps.drift-result.outputs.exit_code }}
+
+      phase1_drift_status: ${{ steps.phase1.outputs.status }}
+      phase1_drift_exit_code: ${{ steps.phase1.outputs.exit_code }}
+
+      phase2_drift_status: ${{ steps.phase2.outputs.status }}
+      phase2_drift_exit_code: ${{ steps.phase2.outputs.exit_code }}
+
+      phase3_drift_status: ${{ steps.phase3.outputs.status }}
+      phase3_drift_exit_code: ${{ steps.phase3.outputs.exit_code }}
 
     steps:
       - name: Checkout Repo
