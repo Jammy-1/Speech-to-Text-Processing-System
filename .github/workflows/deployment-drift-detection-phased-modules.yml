@@ -171,6 +171,8 @@ jobs:
         id: phase1
         continue-on-error: true
         run: |
+          set -o pipefail
+
           terraform plan \
             -target=module.resource_group \
             -target=module.network \
@@ -182,6 +184,17 @@ jobs:
           exit_code=${PIPESTATUS[0]}
 
           echo "Phase 1 Exit Code: $exit_code"
+
+          if [ "$exit_code" -eq 0 ]; then
+            status="no_drift"
+          elif [ "$exit_code" -eq 2 ]; then
+            status="drift_detected"
+          else
+            status="error"
+          fi
+
+          echo "Phase 1 Status: $status"
+          echo "status=$status" >> $GITHUB_OUTPUT
           echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -194,6 +207,8 @@ jobs:
         id: phase2
         continue-on-error: true
         run: |
+          set -o pipefail
+
           terraform plan \
             -target=module.uai-rbac-fic \
             -target=module.key-vault \
@@ -206,6 +221,17 @@ jobs:
           exit_code=${PIPESTATUS[0]}
 
           echo "Phase 2 Exit Code: $exit_code"
+
+          if [ "$exit_code" -eq 0 ]; then
+            status="no_drift"
+          elif [ "$exit_code" -eq 2 ]; then
+            status="drift_detected"
+          else
+            status="error"
+          fi
+
+          echo "Phase 2 Status: $status"
+          echo "status=$status" >> $GITHUB_OUTPUT
           echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -218,6 +244,8 @@ jobs:
         id: phase3
         continue-on-error: true
         run: |
+          set -o pipefail
+
           terraform plan \
             -target=module.acr \
             -target=module.cognitive \
@@ -227,6 +255,19 @@ jobs:
             -no-color | grep "Plan:"
 
           exit_code=${PIPESTATUS[0]}
+
+          echo "Phase 3 Exit Code: $exit_code"
+
+          if [ "$exit_code" -eq 0 ]; then
+            status="no_drift"
+          elif [ "$exit_code" -eq 2 ]; then
+            status="drift_detected"
+          else
+            status="error"
+          fi
+
+          echo "Phase 3 Status: $status"
+          echo "status=$status" >> $GITHUB_OUTPUT
 
           echo "Phase 3 Exit Code: $exit_code"
           echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
