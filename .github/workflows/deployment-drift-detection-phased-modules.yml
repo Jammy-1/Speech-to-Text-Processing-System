@@ -295,8 +295,6 @@ jobs:
 
           echo "Phase 3 Status: $status"
           echo "status=$status" >> $GITHUB_OUTPUT
-
-          echo "Phase 3 Exit Code: $exit_code"
           echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
