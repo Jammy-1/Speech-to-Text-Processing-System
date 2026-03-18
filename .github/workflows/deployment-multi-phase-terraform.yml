@@ -191,17 +191,6 @@ jobs:
         working-directory: .
         run: terraform validate
 
-      # Terraform Plan
-      - name: Terraform Plan
-        run: |
-          terraform plan \
-            -var-file="${TFVARS_FILE}"
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
       # Terraform Plan - Phase 1 - Core Infrastructure
       - name: Terraform Apply - Phase 1 - Core Infrastructure
         id: phase1
@@ -212,7 +201,8 @@ jobs:
             -target=module.resource_group \
             -target=module.network \
             -target=module.log-analytics \
-            -var-file="${TFVARS_FILE}"
+            -var-file="${TFVARS_FILE}" \
+            -no-color | grep "Plan:"
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -230,7 +220,8 @@ jobs:
             -target=module.key-vault \
             -target=module.storage \
             -target=module.queue \
-            -var-file="${TFVARS_FILE}"
+            -var-file="${TFVARS_FILE}" \
+            -no-color | grep "Plan:"
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -247,7 +238,8 @@ jobs:
             -target=module.acr \
             -target=module.cognitive \
             -target=module.aks \
-            -var-file="${TFVARS_FILE}"
+            -var-file="${TFVARS_FILE}" \
+            -no-color | grep "Plan:"
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
