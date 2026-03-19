@@ -152,7 +152,8 @@ jobs:
         run: |
           terraform plan \
             -var-file=../../${ENV}/backend.tfvars \
-            -out=tfplan-backend
+            -out=tfplan-backend \
+            -no-color | grep "Plan:"
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
