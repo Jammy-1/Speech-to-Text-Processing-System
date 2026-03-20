@@ -70,7 +70,7 @@ jobs:
             *) echo "Invalid Branch: $BRANCH"; exit 1 ;;
             esac
 
-          TFVARS_FILE="environments/${ENV}/backend.tfvars"
+          TFVARS_FILE="environments/${ENV}/${ENV}.tfvars"
 
           echo "ENV=$ENV" >> $GITHUB_ENV
           echo "TFVARS_FILE=$TFVARS_FILE" >> $GITHUB_ENV
@@ -79,21 +79,10 @@ jobs:
           echo "Environment: $ENV"
           echo "Using TFVARS File: $TFVARS_FILE"
 
-        # Terraform Backend Folders & Files
-      - name: Terraform Backend Folders & Files
-        run: |
-          echo "Terraform Backend Folders & Files:"
-          for dir in environments/terraform-backend/*; do
-            if [ -d "$dir" ]; then
-              echo "Folder: $dir"
-              ls -1 "$dir"
-            fi
-          done
-
-      # Determine Backend Variables
+               # Determine Backend Variables
       - name: Determine Backend Variables
         run: |
-          BACKEND_FILE="${TFVARS_FILE}"
+          BACKEND_FILE="environments/${ENV}/backend.tfvars"
 
           if [ ! -f "$BACKEND_FILE" ]; then
            echo "Backend TFVARS File Not Found: $BACKEND_FILE"
@@ -114,6 +103,29 @@ jobs:
            echo "STORAGE_ACCOUNT_NAME=$SA" >> $GITHUB_ENV
            echo "STORAGE_CONTAINER_NAME=$CONTAINER" >> $GITHUB_ENV
            echo "STATE_KEY_DEPLOYMENT=$KEY" >> $GITHUB_ENV
+
+        # Backend Variables
+      - name: Backend Variables
+        run: |
+          echo "Resource Group Name       : ${{ env.RG_NAME }}"
+          echo "Storage Account Name      : ${{ env.STORAGE_ACCOUNT_NAME }}"
+          echo "Storage Container Name    : ${{ env.STORAGE_CONTAINER_NAME }}"
+          echo "Terraform Deployment State Key : ${{ env.STATE_KEY_DEPLOYMENT }}"
+
+        # Terraform Backend Folders & Files
+      - name: Terraform Backend Folders & Files
+        run: |
+          echo "Terraform Backend Folders & Files:"
+          for dir in environments/terraform-backend/*; do
+            if [ -d "$dir" ]; then
+              echo "Folder: $dir"
+              ls -1 "$dir"
+            fi
+          done
+
+      # Modules
+      - name: List Module Folders
+        run: ls -l modules/
 
         # Clear Cahce
       - name: Clear Cache
@@ -154,33 +166,33 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
-      # Terraform Plan - Drift Detection
-      - name: Terraform Drift Detection
-        id: drift-plan
+        # Drift Detection
+      - name: Drift Detection
+        id: driftdetection
         run: |
           echo "Running Terraform Drift Detection..."
+          set -o pipefail
+
           terraform plan \
-          -var-file="$TFVARS_FILE" \
-          -detailed-exitcode \
-          -out=tfplan
-          exit_code=$?
+            -var-file="$TFVARS_FILE" \
+            -detailed-exitcode \
+            -no-color | grep "Plan:"
 
-          echo "Terraform exit code: $exit_code"
-          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+          exit_code=${PIPESTATUS[0]}
 
-          if [ $exit_code -eq 0 ]; then
-            echo "Drift Status: No Changes Detected"
-            echo "drift_status=no_drift" >> $GITHUB_OUTPUT
+          echo "Exit Code: $exit_code"
 
-          elif [ $exit_code -eq 2 ]; then
-            echo "Drift Status: Drift Detected! Current Code & Deployed Infra Mismatch"
-            echo "drift_status=drift_detected" >> $GITHUB_OUTPUT
-
+          if [ "$exit_code" -eq 0 ]; then
+            status="no_drift"
+          elif [ "$exit_code" -eq 2 ]; then
+            status="drift_detected"
           else
-            echo "Terraform plan failed"
-            echo "drift_status=error" >> $GITHUB_OUTPUT
-            exit 1
+            status="error"
           fi
+
+          echo "Drift Status: $status"
+          echo "status=$status" >> $GITHUB_OUTPUT
+          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
