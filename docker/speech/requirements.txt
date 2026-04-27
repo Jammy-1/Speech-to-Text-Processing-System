@@ -1,0 +1,14 @@
+# Azure
+azure-identity>=1.15.0
+azure-servicebus>=7.17.0
+azure-storage-blob>=12.19.0
+azure-cognitiveservices-speech>=1.37.0
+
+# Audio handling
+ffmpeg-python>=0.2.0
+pydub>=0.25.1
+
+# Utilities
+requests>=2.31.0
+python-dotenv>=1.0.1
+loguru>=0.7.2
